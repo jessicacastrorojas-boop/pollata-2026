@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Polla Mundialista 2026 Segunda Fase</title>
+  <title>Polla Mundialista 2026 ⚽ — Segunda Fase</title>
   <style>
     :root {
       --bg: #0f172a;
@@ -26,6 +26,8 @@
       color: var(--text);
       min-height: 100vh;
     }
+
+    /* ── Header ── */
     .header {
       background: linear-gradient(135deg, #1e3a8a 0%, #7c3aed 100%);
       padding: 2rem 1rem;
@@ -44,6 +46,8 @@
       padding: 0.35rem 1rem;
       border-radius: 99px;
     }
+
+    /* ── Progress ── */
     .progress-bar-wrap {
       background: var(--surface);
       padding: 1rem;
@@ -65,7 +69,11 @@
       border-radius: 99px;
       transition: width 0.6s ease;
     }
+
+    /* ── Main layout ── */
     .container { max-width: 900px; margin: 0 auto; padding: 1.5rem 1rem; }
+
+    /* ── Section titles ── */
     .section-title {
       font-size: 1.1rem;
       font-weight: 700;
@@ -83,6 +91,8 @@
       height: 1px;
       background: var(--border);
     }
+
+    /* ── Standings table ── */
     .standings { width: 100%; border-collapse: collapse; }
     .standings th {
       background: var(--surface2);
@@ -107,6 +117,140 @@
     .standings .medal-1 { color: var(--gold); }
     .standings .medal-2 { color: var(--silver); }
     .standings .medal-3 { color: var(--bronze); }
+
+    /* ── Clickable player name ── */
+    .player-btn {
+      background: none;
+      border: none;
+      color: var(--text);
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      text-align: left;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: color 0.15s;
+    }
+    .player-btn:hover { color: var(--accent); }
+    .player-btn .chevron {
+      font-size: 0.65rem;
+      color: var(--muted);
+      transition: transform 0.2s;
+    }
+    .player-btn:hover .chevron { color: var(--accent); }
+
+    /* ── Player detail drawer (inline below row) ── */
+    .player-detail-row td {
+      padding: 0;
+      border-bottom: 2px solid var(--accent);
+    }
+    .player-detail-inner {
+      padding: 1rem;
+      background: #0f1f3d;
+      animation: slideDown 0.2s ease;
+    }
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .detail-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.75rem;
+    }
+    .detail-name {
+      font-size: 1rem;
+      font-weight: 800;
+      color: var(--accent);
+    }
+    .detail-subtitle {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-top: 0.1rem;
+    }
+    .detail-close {
+      background: var(--surface2);
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      border-radius: 6px;
+      padding: 0.3rem 0.6rem;
+      font-size: 0.8rem;
+    }
+    .detail-close:hover { color: var(--text); }
+
+    /* Tabs inside drawer */
+    .detail-tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+    }
+    .detail-tab {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      cursor: pointer;
+      border-radius: 6px;
+      padding: 0.3rem 0.75rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      transition: all 0.15s;
+    }
+    .detail-tab.active {
+      background: var(--accent);
+      color: #000;
+      border-color: var(--accent);
+    }
+
+    /* Match rows inside drawer */
+    .detail-match-list { display: flex; flex-direction: column; gap: 0.5rem; }
+    .detail-match {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.6rem 0.9rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+    .detail-match.match-played { border-left: 3px solid var(--accent2); }
+    .detail-match.match-pending { border-left: 3px solid var(--border); }
+    .detail-match.match-today { border-left: 3px solid #7c3aed; }
+    .detail-match .dm-teams { font-size: 0.85rem; font-weight: 600; }
+    .detail-match .dm-date { font-size: 0.7rem; color: var(--muted); }
+    .detail-match .dm-pred { font-size: 1rem; font-weight: 800; color: var(--text); }
+    .detail-match .dm-result { font-size: 0.78rem; color: var(--muted); }
+    .detail-match .dm-pts {
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.2rem 0.5rem;
+      border-radius: 5px;
+      min-width: 32px;
+      text-align: center;
+    }
+    .dm-pts.pts-10 { background: #064e3b; color: #34d399; }
+    .dm-pts.pts-5  { background: #1e3a8a; color: #93c5fd; }
+    .dm-pts.pts-0  { background: #3f1515; color: #fca5a5; }
+    .dm-pts.pts-p  { background: var(--border); color: var(--muted); }
+
+    .detail-summary {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-top: 0.75rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.8rem;
+    }
+    .detail-summary span { color: var(--muted); }
+    .detail-summary strong { color: var(--text); }
+
+    /* ── Match cards ── */
     .match-card {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -131,6 +275,7 @@
     .status-played { background: #065f46; color: #6ee7b7; }
     .status-upcoming { background: #1e3a8a; color: #93c5fd; }
     .status-today { background: #7c3aed; color: #e9d5ff; }
+
     .predictions-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -152,67 +297,207 @@
     .pts-5  { background: #1e3a8a; color: #93c5fd; }
     .pts-0  { background: #3f1515; color: #fca5a5; }
     .pts-pending { background: var(--border); color: var(--muted); }
+
+    /* ── Bonus ── */
     .bonus-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 0.75rem; }
     .bonus-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 0.75rem 1rem; }
     .bonus-label { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.3rem; }
     .bonus-name { font-size: 0.85rem; font-weight: 600; color: var(--text); }
     .bonus-player { font-size: 0.75rem; color: var(--muted); margin-bottom: 0.3rem; }
-    .note-box { background: #1e293b; border-left: 3px solid var(--accent); border-radius: 8px; padding: 0.75rem 1rem; font-size: 0.85rem; color: var(--muted); margin-bottom: 1.5rem; }
+
+    /* ── Note box ── */
+    .note-box {
+      background: #1e293b;
+      border-left: 3px solid var(--accent);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 1.5rem;
+    }
+
+    /* ── Footer ── */
     footer { text-align: center; padding: 2rem 1rem; color: var(--muted); font-size: 0.8rem; border-top: 1px solid var(--border); margin-top: 2rem; }
+
+    /* ── Responsive ── */
     @media (max-width: 600px) {
       .header h1 { font-size: 1.3rem; }
       .match-teams { font-size: 0.9rem; }
+      .detail-tabs { flex-wrap: wrap; }
     }
   </style>
 </head>
 <body>
+
 <div class="header">
-  <h1>Polla Mundialista 2026</h1>
-  <div class="subtitle">Mexico - Estados Unidos - Canada</div>
-  <div class="phase-badge">Segunda Fase - 16avos de Final</div>
+  <h1>⚽ Polla Mundialista 2026</h1>
+  <div class="subtitle">México · Estados Unidos · Canadá</div>
+  <div class="phase-badge">🏆 Segunda Fase — 16avos de Final</div>
 </div>
-<div class="progress-bar-wrap" id="progress-section">
+
+<div class="progress-bar-wrap">
   <div class="progress-label" id="progress-label">Cargando...</div>
-  <div class="progress-track"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+  <div class="progress-track">
+    <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+  </div>
 </div>
+
 <div class="container">
-  <div class="note-box"><strong>Puntuacion:</strong> Marcador exacto = <strong>10 pts</strong> - Resultado correcto = <strong>5 pts</strong> - Solo 90 minutos.</div>
-  <div class="section-title">Tabla de posiciones acumulada</div>
+
+  <div class="note-box">
+    ℹ️ <strong>Puntuación:</strong> Marcador exacto = <strong>10 pts</strong> · Resultado correcto (sin marcador exacto) = <strong>5 pts</strong> · Solo se cuentan los 90 minutos. Toca el nombre de un participante para ver todas sus predicciones.
+  </div>
+
+  <!-- STANDINGS -->
+  <div class="section-title">🏅 Tabla de posiciones acumulada</div>
   <table class="standings" id="standings-table">
-    <thead><tr><th>#</th><th>Participante</th><th style="text-align:right">1a Fase</th><th style="text-align:right">2a Fase</th><th style="text-align:right">Total</th></tr></thead>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Participante</th>
+        <th style="text-align:right">1ª Fase</th>
+        <th style="text-align:right">2ª Fase</th>
+        <th style="text-align:right">Total</th>
+      </tr>
+    </thead>
     <tbody id="standings-body"></tbody>
   </table>
-  <div class="section-title">Partidos 16avos de Final</div>
+
+  <!-- MATCHES -->
+  <div class="section-title">⚽ Partidos 16avos de Final</div>
   <div id="matches-container"></div>
-  <div class="section-title">Predicciones especiales</div>
+
+  <!-- BONUS -->
+  <div class="section-title">🎯 Predicciones especiales</div>
   <div class="bonus-grid" id="bonus-grid"></div>
+
 </div>
-<footer>Polla POLLATA 2026 - Actualizado al <span id="last-updated"></span> - Solo 90 minutos</footer>
+
+<footer>
+  Polla POLLATA 2026 · Actualizado al <span id="last-updated"></span> · Solo 90 minutos
+</footer>
+
 <script>
-const PLAYERS = ['Kamilo Torres','Guillermo Castro','Victor Prieto','Martha Jauregui','Ricardo Rojas','Jose Luis Chaparro','Nicolas Bedoya','Jeyber Chaparro','Caterin Contreras','Bryan Felipe Prieto','Camila Bedoya','Joaquin Jauregui'];
-const PHASE1_PTS = [230, 185, 200, 210, 225, 175, 225, 170, 195, 215, 180, 195];
-const MATCHES = [
-  {id:1,date:'2026-06-28',team1:'Sudafrica',team2:'Canada',result:[0,1],predictions:[[0,2],[0,1],[1,2],[1,2],[0,2],[0,1],[1,2],[2,2],[0,1],[1,2],[1,2],[1,1]]},
-  {id:2,date:'2026-06-29',team1:'Alemania',team2:'Paraguay',result:[null,null],predictions:[[3,0],[3,0],[3,1],[2,0],[3,1],[2,1],[2,1],[3,1],[2,0],[3,1],[2,0],[3,0]]},
-  {id:3,date:'2026-06-29',team1:'Paises Bajos',team2:'Marruecos',result:[null,null],predictions:[[2,2],[2,1],[2,1],[2,1],[3,2],[2,2],[2,1],[2,0],[1,2],[1,1],[2,1],[2,1]]},
-  {id:4,date:'2026-06-29',team1:'Brasil',team2:'Japon',result:[null,null],predictions:[[2,1],[2,1],[3,1],[1,1],[2,3],[2,1],[2,0],[2,0],[2,0],[2,1],[3,1],[3,1]]},
-  {id:5,date:'2026-06-30',team1:'Francia',team2:'Suecia',result:[null,null],predictions:[[3,1],[3,0],[3,1],[3,1],[4,1],[2,0],[3,1],[2,1],[3,1],[3,1],[2,0],[3,0]]},
-  {id:6,date:'2026-06-30',team1:'Costa de Marfil',team2:'Noruega',result:[null,null],predictions:[[1,3],[2,1],[1,3],[1,2],[1,3],[0,2],[2,1],[0,1],[1,2],[1,3],[1,2],[2,1]]},
-  {id:7,date:'2026-06-30',team1:'Mexico',team2:'Ecuador',result:[null,null],predictions:[[1,1],[1,1],[1,2],[2,1],[1,2],[1,1],[2,1],[2,2],[3,1],[2,0],[2,1],[1,2]]},
-  {id:8,date:'2026-07-01',team1:'Inglaterra',team2:'R. del Congo',result:[null,null],predictions:[[3,0],[3,1],[4,1],[2,0],[3,0],[2,0],[3,0],[3,1],[2,0],[3,0],[3,0],[3,1]]},
-  {id:9,date:'2026-07-01',team1:'Estados Unidos',team2:'Bosnia y Herzegovina',result:[null,null],predictions:[[3,1],[2,0],[3,1],[2,1],[3,0],[2,0],[2,0],[2,0],[2,0],[2,1],[2,0],[4,1]]},
-  {id:10,date:'2026-07-01',team1:'Belgica',team2:'Senegal',result:[null,null],predictions:[[2,2],[1,1],[3,1],[1,0],[2,1],[2,1],[2,1],[1,1],[1,0],[3,1],[2,1],[2,0]]},
-  {id:11,date:'2026-07-02',team1:'Portugal',team2:'Croacia',result:[null,null],predictions:[[2,1],[2,1],[3,1],[2,1],[3,2],[1,1],[2,1],[1,2],[1,1],[2,1],[1,1],[2,1]]},
-  {id:12,date:'2026-07-02',team1:'Espana',team2:'Austria',result:[null,null],predictions:[[3,1],[3,0],[4,1],[3,1],[4,1],[2,0],[2,0],[2,1],[2,0],[3,0],[2,1],[3,1]]},
-  {id:13,date:'2026-07-02',team1:'Suiza',team2:'Argelia',result:[null,null],predictions:[[2,1],[2,0],[3,1],[1,0],[3,1],[2,0],[1,0],[2,1],[1,0],[2,1],[1,0],[3,1]]},
-  {id:14,date:'2026-07-03',team1:'Argentina',team2:'Cabo Verde',result:[null,null],predictions:[[3,0],[2,0],[3,1],[3,0],[3,0],[2,0],[3,0],[3,0],[3,1],[3,0],[4,0],[3,1]]},
-  {id:15,date:'2026-07-03',team1:'Colombia',team2:'Ghana',result:[null,null],predictions:[[2,0],[2,0],[3,1],[2,1],[2,0],[2,0],[2,0],[2,0],[2,0],[1,0],[2,0],[2,0]]},
-  {id:16,date:'2026-07-03',team1:'Australia',team2:'Egipto',result:[null,null],predictions:[[1,1],[0,2],[2,2],[1,1],[1,3],[1,1],[2,1],[1,1],[0,1],[1,3],[1,2],[1,3]]}
+// ══════════════════════════════════════════
+//  DATA
+// ══════════════════════════════════════════
+
+const PLAYERS = [
+  'Kamilo Torres',
+  'Guillermo Castro',
+  'Victor Prieto',
+  'Martha Jauregui',
+  'Ricardo Rojas',
+  'Jose Luis Chaparro',
+  'Nicolas Bedoya',
+  'Jeyber Chaparro',
+  'Caterin Contreras',
+  'Bryan Felipe Prieto',
+  'Camila Bedoya',
+  'Joaquin Jauregui',
 ];
+
+const PHASE1_PTS = [230, 185, 200, 210, 225, 175, 225, 170, 195, 215, 180, 195];
+
+const MATCHES = [
+  {
+    id: 1, date: '2026-06-28', team1: 'Sudáfrica', team2: 'Canadá',
+    result: [0, 1],
+    predictions: [[0,2],[0,1],[1,2],[1,2],[0,2],[0,1],[1,2],[2,2],[0,1],[1,2],[1,2],[1,1]],
+  },
+  {
+    id: 2, date: '2026-06-29', team1: 'Alemania', team2: 'Paraguay',
+    result: [null, null],
+    predictions: [[3,0],[3,0],[3,1],[2,0],[3,1],[2,1],[2,1],[3,1],[2,0],[3,1],[2,0],[3,0]],
+  },
+  {
+    id: 3, date: '2026-06-29', team1: 'Países Bajos', team2: 'Marruecos',
+    result: [null, null],
+    predictions: [[2,2],[2,1],[2,1],[2,1],[3,2],[2,2],[2,1],[2,0],[1,2],[1,1],[2,1],[2,1]],
+  },
+  {
+    id: 4, date: '2026-06-29', team1: 'Brasil', team2: 'Japón',
+    result: [null, null],
+    predictions: [[2,1],[2,1],[3,1],[1,1],[2,3],[2,1],[2,0],[2,0],[2,0],[2,1],[3,1],[3,1]],
+  },
+  {
+    id: 5, date: '2026-06-30', team1: 'Francia', team2: 'Suecia',
+    result: [null, null],
+    predictions: [[3,1],[3,0],[3,1],[3,1],[4,1],[2,0],[3,1],[2,1],[3,1],[3,1],[2,0],[3,0]],
+  },
+  {
+    id: 6, date: '2026-06-30', team1: 'Costa de Marfil', team2: 'Noruega',
+    result: [null, null],
+    predictions: [[1,3],[2,1],[1,3],[1,2],[1,3],[0,2],[2,1],[0,1],[1,2],[1,3],[1,2],[2,1]],
+  },
+  {
+    id: 7, date: '2026-06-30', team1: 'México', team2: 'Ecuador',
+    result: [null, null],
+    predictions: [[1,1],[1,1],[1,2],[2,1],[1,2],[1,1],[2,1],[2,2],[3,1],[2,0],[2,1],[1,2]],
+  },
+  {
+    id: 8, date: '2026-07-01', team1: 'Inglaterra', team2: 'R. del Congo',
+    result: [null, null],
+    predictions: [[3,0],[3,1],[4,1],[2,0],[3,0],[2,0],[3,0],[3,1],[2,0],[3,0],[3,0],[3,1]],
+  },
+  {
+    id: 9, date: '2026-07-01', team1: 'Estados Unidos', team2: 'Bosnia y Herzegovina',
+    result: [null, null],
+    predictions: [[3,1],[2,0],[3,1],[2,1],[3,0],[2,0],[2,0],[2,0],[2,0],[2,1],[2,0],[4,1]],
+  },
+  {
+    id: 10, date: '2026-07-01', team1: 'Bélgica', team2: 'Senegal',
+    result: [null, null],
+    predictions: [[2,2],[1,1],[3,1],[1,0],[2,1],[2,1],[2,1],[1,1],[1,0],[3,1],[2,1],[2,0]],
+  },
+  {
+    id: 11, date: '2026-07-02', team1: 'Portugal', team2: 'Croacia',
+    result: [null, null],
+    predictions: [[2,1],[2,1],[3,1],[2,1],[3,2],[1,1],[2,1],[1,2],[1,1],[2,1],[1,1],[2,1]],
+  },
+  {
+    id: 12, date: '2026-07-02', team1: 'España', team2: 'Austria',
+    result: [null, null],
+    predictions: [[3,1],[3,0],[4,1],[3,1],[4,1],[2,0],[2,0],[2,1],[2,0],[3,0],[2,1],[3,1]],
+  },
+  {
+    id: 13, date: '2026-07-02', team1: 'Suiza', team2: 'Argelia',
+    result: [null, null],
+    predictions: [[2,1],[2,0],[3,1],[1,0],[3,1],[2,0],[1,0],[2,1],[1,0],[2,1],[1,0],[3,1]],
+  },
+  {
+    id: 14, date: '2026-07-03', team1: 'Argentina', team2: 'Cabo Verde',
+    result: [null, null],
+    predictions: [[3,0],[2,0],[3,1],[3,0],[3,0],[2,0],[3,0],[3,0],[3,1],[3,0],[4,0],[3,1]],
+  },
+  {
+    id: 15, date: '2026-07-03', team1: 'Colombia', team2: 'Ghana',
+    result: [null, null],
+    predictions: [[2,0],[2,0],[3,1],[2,1],[2,0],[2,0],[2,0],[2,0],[2,0],[1,0],[2,0],[2,0]],
+  },
+  {
+    id: 16, date: '2026-07-03', team1: 'Australia', team2: 'Egipto',
+    result: [null, null],
+    predictions: [[1,1],[0,2],[2,2],[1,1],[1,3],[1,1],[2,1],[1,1],[0,1],[1,3],[1,2],[1,3]],
+  },
+];
+
 const BONUS = {
-  goleador: {label:'Goleador del Mundial',predictions:['Haaland','Harry Kane','Mbappe','Kylian Mbappe','Harry Kane','Kylian Mbappe','Kylian Mbappe','Kylian Mbappe','Lucho Diaz','Kai Havertz','Harry Kane','Luis Suarez'],result:null},
-  campeon: {label:'Campeon del Mundial',predictions:['Portugal','Francia','Francia','Francia','Inglaterra','Francia','Francia','Espana','Portugal','Francia','Inglaterra','Alemania'],result:null}
+  goleador: {
+    label: 'Goleador del Mundial',
+    predictions: ['Haaland','Harry Kane','Mbappé','Kylian Mbappé','Harry Kane','Kylian Mbappé','Kylian Mbappé','Kylian Mbappé','Lucho Díaz','Kai Havertz','Harry Kane','Luis Suárez'],
+    result: null,
+  },
+  campeon: {
+    label: 'Campeón del Mundial',
+    predictions: ['Portugal','Francia','Francia','Francia','Inglaterra','Francia','Francia','España','Portugal','Francia','Inglaterra','Alemania'],
+    result: null,
+  },
 };
+
+// ══════════════════════════════════════════
+//  SCORING
+// ══════════════════════════════════════════
 function calcPoints(result, pred) {
   const [r1, r2] = result;
   const [p1, p2] = pred;
@@ -222,42 +507,244 @@ function calcPoints(result, pred) {
   const pWin = p1 > p2 ? 1 : p1 < p2 ? -1 : 0;
   return rWin === pWin ? 5 : 0;
 }
-function phase2Pts(i) { return MATCHES.reduce((s,m) => s + (calcPoints(m.result,m.predictions[i]) ?? 0), 0); }
+
+function phase2Pts(playerIdx) {
+  return MATCHES.reduce((s, m) => s + (calcPoints(m.result, m.predictions[playerIdx]) ?? 0), 0);
+}
+
+// ══════════════════════════════════════════
+//  PLAYER DETAIL DRAWER
+// ══════════════════════════════════════════
+let openPlayerIdx = null;
+
+function openPlayerDetail(playerIdx, triggerRowEl) {
+  // Remove any existing detail row
+  closePlayerDetail();
+
+  openPlayerIdx = playerIdx;
+
+  const today = new Date().toISOString().slice(0, 10);
+  const name = PLAYERS[playerIdx];
+  const p1 = PHASE1_PTS[playerIdx];
+  const p2 = phase2Pts(playerIdx);
+
+  // Count stats
+  const played   = MATCHES.filter(m => m.result[0] !== null);
+  const pending  = MATCHES.filter(m => m.result[0] === null);
+  const exactos  = played.filter(m => calcPoints(m.result, m.predictions[playerIdx]) === 10).length;
+  const results  = played.filter(m => calcPoints(m.result, m.predictions[playerIdx]) === 5).length;
+
+  function matchRow(m, tab) {
+    const isPlayed = m.result[0] !== null;
+    const isToday  = m.date === today;
+    const pts = calcPoints(m.result, m.predictions[playerIdx]);
+    const pred = m.predictions[playerIdx];
+    const ptsCls = pts === null ? 'pts-p' : pts === 10 ? 'pts-10' : pts === 5 ? 'pts-5' : 'pts-0';
+    const cardCls = isPlayed ? 'match-played' : isToday ? 'match-today' : 'match-pending';
+
+    const resultInfo = isPlayed
+      ? `<span class="dm-result">Resultado: ${m.result[0]}–${m.result[1]}</span>`
+      : `<span class="dm-result">${isToday ? '🔴 Hoy' : formatDate(m.date)}</span>`;
+
+    return `
+      <div class="detail-match ${cardCls}">
+        <div>
+          <div class="dm-teams">${m.team1} vs ${m.team2}</div>
+          ${resultInfo}
+        </div>
+        <div style="display:flex;align-items:center;gap:0.6rem">
+          <span class="dm-pred">${pred[0]}–${pred[1]}</span>
+          <span class="dm-pts ${ptsCls}">${pts === null ? '?' : pts + ' pts'}</span>
+        </div>
+      </div>
+    `;
+  }
+
+  const pendingRows = pending.map(m => matchRow(m, 'pending')).join('');
+  const playedRows  = played.map(m => matchRow(m, 'played')).join('');
+
+  const detailHTML = `
+    <div class="player-detail-inner">
+      <div class="detail-header">
+        <div>
+          <div class="detail-name">${name}</div>
+          <div class="detail-subtitle">${p1} pts (1ª fase) + ${p2} pts (2ª fase) = <strong>${p1 + p2} total</strong></div>
+        </div>
+        <button class="detail-close" onclick="closePlayerDetail()">✕ Cerrar</button>
+      </div>
+
+      <div class="detail-tabs">
+        <button class="detail-tab active" id="tab-pending-${playerIdx}" onclick="switchTab(${playerIdx},'pending')">
+          Pendientes (${pending.length})
+        </button>
+        <button class="detail-tab" id="tab-played-${playerIdx}" onclick="switchTab(${playerIdx},'played')">
+          Jugados (${played.length})
+        </button>
+      </div>
+
+      <div id="tab-content-pending-${playerIdx}" class="detail-match-list">
+        ${pending.length > 0 ? pendingRows : '<p style="color:var(--muted);font-size:0.85rem">No hay partidos pendientes.</p>'}
+      </div>
+      <div id="tab-content-played-${playerIdx}" class="detail-match-list" style="display:none">
+        ${played.length > 0 ? playedRows : '<p style="color:var(--muted);font-size:0.85rem">No hay partidos jugados aún.</p>'}
+      </div>
+
+      <div class="detail-summary">
+        <span>Exactos: <strong>${exactos}</strong></span>
+        <span>Solo resultado: <strong>${results}</strong></span>
+        <span>Pts 2ª fase: <strong style="color:var(--accent2)">+${p2}</strong></span>
+        <span>Total acumulado: <strong style="color:var(--accent)">${p1 + p2}</strong></span>
+      </div>
+    </div>
+  `;
+
+  // Insert a new TR after the trigger row
+  const newRow = document.createElement('tr');
+  newRow.className = 'player-detail-row';
+  newRow.id = `detail-row-${playerIdx}`;
+  const td = document.createElement('td');
+  td.colSpan = 5;
+  td.innerHTML = detailHTML;
+  newRow.appendChild(td);
+  triggerRowEl.parentNode.insertBefore(newRow, triggerRowEl.nextSibling);
+
+  // Rotate chevron on trigger row
+  const btn = triggerRowEl.querySelector('.player-btn');
+  if (btn) btn.querySelector('.chevron').textContent = '▲';
+}
+
+function closePlayerDetail() {
+  if (openPlayerIdx === null) return;
+  const row = document.getElementById(`detail-row-${openPlayerIdx}`);
+  if (row) row.remove();
+
+  // Reset chevrons
+  document.querySelectorAll('.chevron').forEach(el => el.textContent = '▼');
+  openPlayerIdx = null;
+}
+
+function switchTab(playerIdx, tab) {
+  ['pending', 'played'].forEach(t => {
+    const content = document.getElementById(`tab-content-${t}-${playerIdx}`);
+    const btn = document.getElementById(`tab-${t}-${playerIdx}`);
+    if (content) content.style.display = t === tab ? 'flex' : 'none';
+    if (content && t === tab) content.style.flexDirection = 'column';
+    if (btn) btn.classList.toggle('active', t === tab);
+  });
+}
+
+function handlePlayerClick(playerIdx, rowEl) {
+  if (openPlayerIdx === playerIdx) {
+    closePlayerDetail();
+  } else {
+    openPlayerDetail(playerIdx, rowEl);
+  }
+}
+
+// ══════════════════════════════════════════
+//  RENDER
+// ══════════════════════════════════════════
+function formatDate(d) {
+  const date = new Date(d + 'T12:00:00');
+  return date.toLocaleDateString('es-CO', { weekday: 'short', day: 'numeric', month: 'short' });
+}
+
 function renderStandings() {
-  const rows = PLAYERS.map((n,i) => ({name:n,p1:PHASE1_PTS[i],p2:phase2Pts(i),total:PHASE1_PTS[i]+phase2Pts(i)})).sort((a,b)=>b.total-a.total);
-  const medals = ['#1','#2','#3'];
-  document.getElementById('standings-body').innerHTML = rows.map((p,i) => `<tr><td class="pos">${medals[i]||i+1}</td><td class="name">${p.name}</td><td class="p1">${p.p1}</td><td class="p2">${p.p2>0?'+'+p.p2:p.p2===0?'--':p.p2}</td><td class="pts">${p.total}</td></tr>`).join('');
+  const standings = PLAYERS.map((name, i) => {
+    const p2 = phase2Pts(i);
+    return { name, idx: i, p1: PHASE1_PTS[i], p2, total: PHASE1_PTS[i] + p2 };
+  }).sort((a, b) => b.total - a.total);
+
+  const medals  = ['🥇', '🥈', '🥉'];
+  const medCls  = ['medal-1', 'medal-2', 'medal-3'];
+
+  const tbody = document.getElementById('standings-body');
+  tbody.innerHTML = standings.map((p, rank) => `
+    <tr id="player-row-${p.idx}" style="cursor:pointer" onclick="handlePlayerClick(${p.idx}, this)">
+      <td class="pos ${medCls[rank] || ''}">${medals[rank] || rank + 1}</td>
+      <td class="name">
+        <button class="player-btn">
+          ${p.name} <span class="chevron">▼</span>
+        </button>
+      </td>
+      <td class="p1">${p.p1}</td>
+      <td class="p2">${p.p2 > 0 ? '+' + p.p2 : p.p2 === 0 ? '–' : p.p2}</td>
+      <td class="pts">${p.total}</td>
+    </tr>
+  `).join('');
 }
+
 function renderMatches() {
-  const today = new Date().toISOString().slice(0,10);
-  document.getElementById('matches-container').innerHTML = MATCHES.map(m => {
-    const played = m.result[0]!==null;
-    const isToday = m.date===today;
-    const statusLabel = played?'Jugado':isToday?'Hoy':'Pendiente';
-    const statusCls = played?'status-played':isToday?'status-today':'status-upcoming';
-    const resultStr = played?m.result[0]+'-'+m.result[1]:'- vs -';
-    const preds = PLAYERS.map((n,i) => {
-      const pts = calcPoints(m.result,m.predictions[i]);
-      const cls = pts===null?'pts-pending':pts===10?'pts-10':pts===5?'pts-5':'pts-0';
-      return `<div class="prediction-cell"><span class="pname">${n.split(' ')[0]}</span><span class="pred-score">${m.predictions[i][0]}-${m.predictions[i][1]}</span><span class="pred-pts ${cls}">${pts===null?'?':pts}</span></div>`;
+  const today = new Date().toISOString().slice(0, 10);
+  const container = document.getElementById('matches-container');
+
+  container.innerHTML = MATCHES.map(m => {
+    const played     = m.result[0] !== null;
+    const isToday    = m.date === today;
+    const statusLabel = played ? 'Jugado' : isToday ? 'Hoy' : 'Pendiente';
+    const statusCls   = played ? 'status-played' : isToday ? 'status-today' : 'status-upcoming';
+    const resultStr   = played ? `${m.result[0]}–${m.result[1]}` : '– vs –';
+
+    const predRows = PLAYERS.map((name, i) => {
+      const pts = calcPoints(m.result, m.predictions[i]);
+      const ptsCls = pts === null ? 'pts-pending' : pts === 10 ? 'pts-10' : pts === 5 ? 'pts-5' : 'pts-0';
+      return `
+        <div class="prediction-cell">
+          <span class="pname" title="${name}">${name.split(' ')[0]}</span>
+          <span class="pred-score">${m.predictions[i][0]}–${m.predictions[i][1]}</span>
+          <span class="pred-pts ${ptsCls}">${pts === null ? '?' : pts}</span>
+        </div>`;
     }).join('');
-    return `<div class="match-card"><div class="match-header"><div><div class="match-teams">${m.team1} vs ${m.team2}</div><div class="match-meta">Partido ${m.id} - ${m.date}</div></div><div style="display:flex;align-items:center;gap:0.75rem"><span class="match-result">${resultStr}</span><span class="match-status ${statusCls}">${statusLabel}</span></div></div><div class="predictions-grid">${preds}</div></div>`;
+
+    return `
+      <div class="match-card">
+        <div class="match-header">
+          <div>
+            <div class="match-teams">${m.team1} <span style="color:var(--muted)">vs</span> ${m.team2}</div>
+            <div class="match-meta">${formatDate(m.date)} · Partido ${m.id}</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:0.75rem">
+            <span class="match-result">${resultStr}</span>
+            <span class="match-status ${statusCls}">${statusLabel}</span>
+          </div>
+        </div>
+        <div class="predictions-grid">${predRows}</div>
+      </div>`;
   }).join('');
 }
+
 function renderBonus() {
-  document.getElementById('bonus-grid').innerHTML = ['goleador','campeon'].map(k => {
-    const b = BONUS[k];
-    const cards = PLAYERS.map((n,i) => `<div class="bonus-card"><div class="bonus-player">${n.split(' ')[0]}</div><div class="bonus-name">${b.predictions[i]}</div></div>`).join('');
-    return `<div style="grid-column:1/-1"><div class="section-title">${b.label}</div><div class="bonus-grid">${cards}</div></div>`;
+  const grid = document.getElementById('bonus-grid');
+  grid.innerHTML = ['goleador', 'campeon'].map(key => {
+    const b = BONUS[key];
+    const rows = PLAYERS.map((name, i) => `
+      <div class="bonus-card">
+        <div class="bonus-player">${name.split(' ')[0]}</div>
+        <div class="bonus-name">${b.predictions[i]}</div>
+        ${b.result ? `<div class="bonus-label">→ resultado: ${b.result}</div>` : ''}
+      </div>`).join('');
+    return `
+      <div style="grid-column:1/-1">
+        <div class="section-title" style="margin-top:0.5rem">${b.label}</div>
+        <div class="bonus-grid">${rows}</div>
+      </div>`;
   }).join('');
 }
+
 function renderProgress() {
-  const played = MATCHES.filter(m=>m.result[0]!==null).length;
-  const total = MATCHES.length;
-  document.getElementById('progress-label').textContent = played+' de '+total+' partidos jugados (16avos de final)';
-  document.getElementById('progress-fill').style.width = Math.round(played/total*100)+'%';
+  const played = MATCHES.filter(m => m.result[0] !== null).length;
+  const total  = MATCHES.length;
+  document.getElementById('progress-label').textContent =
+    `⚽ ${played} de ${total} partidos jugados (16avos de final)`;
+  document.getElementById('progress-fill').style.width =
+    Math.round((played / total) * 100) + '%';
 }
-function updateDate() { document.getElementById('last-updated').textContent = new Date().toLocaleString('es-CO',{dateStyle:'medium',timeStyle:'short'}); }
+
+function updateDate() {
+  document.getElementById('last-updated').textContent =
+    new Date().toLocaleString('es-CO', { dateStyle: 'medium', timeStyle: 'short' });
+}
+
 renderProgress();
 renderStandings();
 renderMatches();
