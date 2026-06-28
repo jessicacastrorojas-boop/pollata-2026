@@ -316,6 +316,77 @@
       margin-bottom: 1.5rem;
     }
 
+    /* ── Share bar ── */
+    .share-bar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0.75rem 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .share-label { font-size: 0.8rem; color: var(--muted); font-weight: 600; }
+    .share-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.45rem 1rem;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      text-decoration: none;
+      transition: opacity 0.15s;
+    }
+    .share-btn:hover { opacity: 0.85; }
+    .btn-wa  { background: #25d366; color: #fff; }
+    .btn-copy { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+    .btn-qr  { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+    .short-url {
+      font-size: 0.82rem;
+      color: var(--accent);
+      font-weight: 700;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.35rem 0.7rem;
+      letter-spacing: 0.02em;
+    }
+
+    /* ── QR Modal ── */
+    .qr-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    .qr-overlay.open { display: flex; }
+    .qr-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      text-align: center;
+      max-width: 280px;
+      width: 90%;
+      animation: fadeInUp 0.2s ease;
+    }
+    @keyframes fadeInUp {
+      from { opacity:0; transform:translateY(16px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+    .qr-box h3 { font-size: 1rem; margin-bottom: 0.25rem; }
+    .qr-box p  { font-size: 0.78rem; color: var(--muted); margin-bottom: 1rem; }
+    .qr-box img { border-radius: 8px; background: #fff; padding: 6px; width: 200px; height: 200px; }
+    .qr-url { font-size: 0.75rem; color: var(--accent); margin-top: 0.75rem; word-break: break-all; }
+    .qr-close { margin-top: 1rem; background: var(--surface2); border: 1px solid var(--border); color: var(--text); border-radius: 8px; padding: 0.4rem 1.2rem; cursor: pointer; font-size: 0.85rem; }
+
     /* ── Footer ── */
     footer { text-align: center; padding: 2rem 1rem; color: var(--muted); font-size: 0.8rem; border-top: 1px solid var(--border); margin-top: 2rem; }
 
@@ -324,6 +395,7 @@
       .header h1 { font-size: 1.3rem; }
       .match-teams { font-size: 0.9rem; }
       .detail-tabs { flex-wrap: wrap; }
+      .share-bar { gap: 0.5rem; }
     }
   </style>
 </head>
@@ -333,6 +405,29 @@
   <h1>⚽ Polla Mundialista 2026</h1>
   <div class="subtitle">México · Estados Unidos · Canadá</div>
   <div class="phase-badge">🏆 Segunda Fase — 16avos de Final</div>
+</div>
+
+<!-- ── Share bar ── -->
+<div class="share-bar">
+  <span class="share-label">Compartir:</span>
+  <a class="share-btn btn-wa" href="https://wa.me/?text=Polla%20Mundialista%202026%20%F0%9F%8F%86%20%E2%80%94%20Segunda%20Fase%0Ahttps%3A%2F%2Ftinyurl.com%2F28qqlyoy" target="_blank" rel="noopener">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.138.564 4.144 1.547 5.878L0 24l6.304-1.522A11.95 11.95 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.003-1.371l-.359-.214-3.741.903.947-3.648-.234-.374A9.818 9.818 0 1112 21.818z"/></svg>
+    WhatsApp
+  </a>
+  <span class="short-url">tinyurl.com/28qqlyoy</span>
+  <button class="share-btn btn-copy" onclick="copyLink()">📋 Copiar link</button>
+  <button class="share-btn btn-qr" onclick="openQR()">📷 Ver QR</button>
+</div>
+
+<!-- ── QR Modal ── -->
+<div class="qr-overlay" id="qr-overlay" onclick="closeQROutside(event)">
+  <div class="qr-box">
+    <h3>Código QR</h3>
+    <p>Escanea para abrir la polla</p>
+    <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&color=f59e0b&bgcolor=0f172a&data=https%3A%2F%2Ftinyurl.com%2F28qqlyoy" alt="QR Polla 2026" />
+    <div class="qr-url">tinyurl.com/28qqlyoy</div>
+    <button class="qr-close" onclick="closeQR()">Cerrar</button>
+  </div>
 </div>
 
 <div class="progress-bar-wrap">
@@ -750,6 +845,43 @@ renderStandings();
 renderMatches();
 renderBonus();
 updateDate();
+
+// ── Share helpers ──
+const SHARE_URL = 'https://tinyurl.com/28qqlyoy';
+const LONG_URL  = 'https://jessicacastrorojas-boop.github.io/pollata-2026/';
+
+function copyLink() {
+  const url = SHARE_URL;
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(url).then(() => showToast('Link copiado ✅'));
+  } else {
+    const ta = document.createElement('textarea');
+    ta.value = url;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    showToast('Link copiado ✅');
+  }
+}
+
+function openQR()  { document.getElementById('qr-overlay').classList.add('open'); }
+function closeQR() { document.getElementById('qr-overlay').classList.remove('open'); }
+function closeQROutside(e) { if (e.target === document.getElementById('qr-overlay')) closeQR(); }
+
+function showToast(msg) {
+  let t = document.getElementById('toast');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = 'toast';
+    t.style.cssText = 'position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);background:#10b981;color:#fff;padding:0.5rem 1.2rem;border-radius:8px;font-size:0.85rem;font-weight:700;z-index:9999;pointer-events:none;transition:opacity 0.3s';
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  t.style.opacity = '1';
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => { t.style.opacity = '0'; }, 2200);
+}
 </script>
 </body>
 </html>
