@@ -818,7 +818,9 @@ function renderMatches() {
     const played      = m.result[0] !== null;
     const isLive      = m._live === true;
     const isToday     = m.date === today;
-    const statusLabel = isLive ? `🔴 ${m._clock || 'EN VIVO'}` : played ? 'Jugado' : isToday ? 'Hoy' : 'Pendiente';
+    const statusLabel = isLive
+      ? (m._inAET ? `🔴 ${m._clock||'ET'} (marcador 90')` : `🔴 ${m._clock || 'EN VIVO'}`)
+      : played ? 'Jugado' : isToday ? 'Hoy' : 'Pendiente';
     const statusCls   = isLive ? 'status-live' : played ? 'status-played' : isToday ? 'status-today' : 'status-upcoming';
     const resultStr   = played ? `${m.result[0]}–${m.result[1]}` : '– vs –';
 
@@ -1079,8 +1081,14 @@ async function loadLiveScores(showFeedback = false) {
       for (const event of data.events || []) {
         const comp = event.competitions[0];
         const status = comp.status.type;
-        const isLive  = status.state === 'in' || status.state === 'halftime';
-        const isDone  = status.completed;
+        // 90-min states: STATUS_FULL_TIME (id 28) or still in play (periods 1-2)
+        // Extra time / penalties: STATUS_FINAL_AET, STATUS_FINAL_PEN
+        const isLive    = status.state === 'in' || status.state === 'halftime';
+        const isDone    = status.completed;
+        const isAET     = isDone && (status.name === 'STATUS_FINAL_AET' || status.name === 'STATUS_FINAL_PEN');
+        // Only periods 1 & 2 count (= 90 minutes regular time)
+        const isInAET   = isLive && (comp.status.period > 2);  // live extra time
+        const clock     = isLive && !isInAET ? (comp.status.displayClock || '') : isInAET ? 'ET' : '';
 
         const home = comp.competitors.find(c => c.homeAway === 'home');
         const away = comp.competitors.find(c => c.homeAway === 'away');
@@ -1088,11 +1096,35 @@ async function loadLiveScores(showFeedback = false) {
 
         const homeEs = ESPN_TEAM_MAP[home.team.displayName] || home.team.displayName;
         const awayEs = ESPN_TEAM_MAP[away.team.displayName] || away.team.displayName;
-        const homeScore = parseInt(home.score) || 0;
-        const awayScore = parseInt(away.score) || 0;
-        const clock = isLive ? (comp.status.displayClock || '') : '';
 
-        if (isLive) liveCount++;
+        // ── Score extraction: ONLY regular time (periods 1 + 2) ──────────────
+        // If ended in AET or PKs, sum linescores for periods 1 & 2 only.
+        // During live ET, also cap at period-2 linescores.
+        function reg90Score(competitor) {
+          const ls = competitor.linescores;
+          if ((isAET || isInAET) && Array.isArray(ls) && ls.length >= 2) {
+            // linescores are per half; periods 1 and 2 = regulation
+            return ls.filter(l => l.period <= 2).reduce((s, l) => s + (parseInt(l.value) || 0), 0);
+          }
+          return parseInt(competitor.score) || 0;
+        }
+
+        const homeScore = reg90Score(home);
+        const awayScore = reg90Score(away);
+
+        if (isLive) {
+          liveCount++;
+          // Tag the match as in extra time so the UI can show it clearly
+          if (isInAET) {
+            for (const m of MATCHES) {
+              const h = normalize(homeEs), aw = normalize(awayEs);
+              if ((normalize(m.team1)===h && normalize(m.team2)===aw) ||
+                  (normalize(m.team1)===aw && normalize(m.team2)===h)) {
+                m._inAET = true;
+              }
+            }
+          }
+        }
 
         for (const m of MATCHES) {
           const t1n = normalize(m.team1), t2n = normalize(m.team2);
