@@ -805,8 +805,37 @@ function handlePlayerClick(playerIdx, rowEl) {
 // ══════════════════════════════════════════
 //  RENDER
 // ══════════════════════════════════════════
-function formatDate(d) {
-  return new Date(d + 'T12:00:00').toLocaleDateString('es-CO', { weekday: 'short', day: 'numeric', month: 'short' });
+// Horarios en hora Colombia (UTC-5) por id de partido
+const MATCH_TIMES_COL = {
+  1: '2026-06-28T14:00',   // Sudáfrica vs Canadá
+  4: '2026-06-29T12:00',   // Brasil vs Japón
+  2: '2026-06-29T15:30',   // Alemania vs Paraguay
+  3: '2026-06-29T20:00',   // Países Bajos vs Marruecos
+  6: '2026-06-30T12:00',   // Costa de Marfil vs Noruega
+  5: '2026-06-30T16:00',   // Francia vs Suecia
+  7: '2026-06-30T20:00',   // México vs Ecuador
+  8: '2026-07-01T11:00',   // Inglaterra vs R. del Congo
+  10:'2026-07-01T15:00',   // Bélgica vs Senegal
+  9: '2026-07-01T19:00',   // Estados Unidos vs Bosnia y Herzegovina
+  12:'2026-07-02T14:00',   // España vs Austria
+  11:'2026-07-02T18:00',   // Portugal vs Croacia
+  13:'2026-07-02T22:00',   // Suiza vs Argelia
+  16:'2026-07-03T13:00',   // Australia vs Egipto
+  14:'2026-07-03T17:00',   // Argentina vs Cabo Verde
+  15:'2026-07-03T20:30',   // Colombia vs Ghana
+};
+
+function formatDateTime(matchId) {
+  const iso = MATCH_TIMES_COL[matchId];
+  if (!iso) return '';
+  const dt = new Date(iso + ':00');   // local parse (no tz shift needed — already Colombia)
+  const day = dt.toLocaleDateString('es-CO', { weekday: 'short', day: 'numeric', month: 'short' });
+  const hr  = dt.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit', hour12: true });
+  return `${day} · ${hr}`;
+}
+
+function matchSortKey(m) {
+  return MATCH_TIMES_COL[m.id] || (m.date + 'T23:59');
 }
 
 function renderStandings() {
@@ -840,7 +869,8 @@ function flagImg(country, size) {
 
 function renderMatches() {
   const today = new Date().toISOString().slice(0, 10);
-  document.getElementById('matches-container').innerHTML = MATCHES.map(m => {
+  const sorted = [...MATCHES].sort((a, b) => matchSortKey(a).localeCompare(matchSortKey(b)));
+  document.getElementById('matches-container').innerHTML = sorted.map(m => {
     const played      = m.result[0] !== null;
     const isLive      = m._live === true;
     const isToday     = m.date === today;
@@ -872,7 +902,7 @@ function renderMatches() {
             <span style="color:var(--muted);margin:0 0.4rem">vs</span>
             ${f2}${m.team2}
           </div>
-          <div class="match-meta">${formatDate(m.date)} · Partido ${m.id}</div>
+          <div class="match-meta">${formatDateTime(m.id)}</div>
         </div>
         <div style="display:flex;align-items:center;gap:0.75rem">
           <span class="match-result">${resultStr}</span>
