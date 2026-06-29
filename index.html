@@ -860,15 +860,12 @@ function renderStandings() {
     p.pos = 1 + standings.filter(q => q.tot > p.tot).length;
   });
 
-  // Keep only players in positions 1, 2, or 3 (includes all ties at those positions)
-  const top3 = standings.filter(p => p.pos <= 3);
-
   const medals = { 1: '🥇', 2: '🥈', 3: '🥉' };
   const medCls = { 1: 'medal-1', 2: 'medal-2', 3: 'medal-3' };
 
-  document.getElementById('standings-body').innerHTML = top3.map(p => `
+  document.getElementById('standings-body').innerHTML = standings.map(p => `
     <tr id="player-row-${p.i}" style="cursor:pointer" onclick="handlePlayerClick(${p.i}, this)">
-      <td class="pos ${medCls[p.pos] || ''}">${medals[p.pos] || p.pos}</td>
+      <td class="pos ${medCls[p.pos] || ''}">${medals[p.pos] || p.pos + '.'}</td>
       <td class="name">
         <button class="player-btn">${p.name} <span class="chevron">▼</span></button>
       </td>
