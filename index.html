@@ -190,6 +190,14 @@
     .bonus-name { font-size: 0.85rem; font-weight: 600; color: var(--text); }
     .bonus-player { font-size: 0.75rem; color: var(--muted); margin-bottom: 0.3rem; }
     .bonus-result-tag { font-size: 0.7rem; margin-top: 0.35rem; color: var(--accent2); font-weight: 700; }
+    .goal-badge { display: inline-flex; align-items: center; gap: 3px; background: #064e3b; color: #6ee7b7; border-radius: 20px; padding: 2px 9px; font-size: 0.72rem; font-weight: 800; margin: 0.3rem auto 0; }
+    .goal-badge.top { background: #78350f; color: #fcd34d; }
+    .goal-table { display: flex; flex-direction: column; gap: 4px; margin: 0.5rem 0 0.75rem; padding: 0.6rem 0.75rem; background: #0a1a12; border: 1px solid #1a3d22; border-radius: 8px; font-size: 0.78rem; }
+    .goal-row { display: flex; align-items: center; gap: 0.5rem; padding: 2px 0; }
+    .goal-rank { width: 1.1rem; text-align: right; font-weight: 700; color: var(--muted); }
+    .goal-rank.g1 { color: #fcd34d; } .goal-rank.g2 { color: #d1d5db; } .goal-rank.g3 { color: #b45309; }
+    .goal-pname { flex: 1; color: var(--text); font-weight: 600; }
+    .goal-count { background: #064e3b; color: #6ee7b7; border-radius: 12px; padding: 1px 8px; font-weight: 800; }
 
     /* ── Bonus images ── */
     .bonus-card { text-align: center; }
@@ -847,6 +855,52 @@ function renderMatches() {
   }).join('');
 }
 
+// ── Goal leaders (ESPN API) ─────────────────────────────────────────────────
+let GOAL_COUNTS = {};  // normalized ESPN name → goals
+
+// Maps our short/alt prediction names → normalized ESPN display name
+const GOLEADOR_TO_ESPN = {
+  'haaland':        'erling haaland',
+  'erling haaland': 'erling haaland',
+  'harry kane':     'harry kane',
+  'kane':           'harry kane',
+  'mbappe':         'kylian mbappe',
+  'kylian mbappe':  'kylian mbappe',
+  'lucho diaz':     'luis diaz',
+  'luis diaz':      'luis diaz',
+  'kai havertz':    'kai havertz',
+  'havertz':        'kai havertz',
+  'luis suarez':    'luis suarez',
+  'suarez':         'luis suarez',
+};
+
+function getPlayerGoals(predName) {
+  const norm = normalize(predName);
+  if (GOAL_COUNTS[norm] !== undefined) return GOAL_COUNTS[norm];
+  const espnNorm = GOLEADOR_TO_ESPN[norm];
+  if (espnNorm && GOAL_COUNTS[espnNorm] !== undefined) return GOAL_COUNTS[espnNorm];
+  return Object.keys(GOAL_COUNTS).length > 0 ? 0 : null;  // null = not yet loaded
+}
+
+async function fetchGoalLeaders() {
+  try {
+    const res = await fetch(
+      'https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/statistics?limit=50',
+      { cache: 'no-store' }
+    );
+    if (!res.ok) return;
+    const data = await res.json();
+    const cat = (data.stats || []).find(s => s.name === 'goalsLeaders');
+    if (!cat) return;
+    for (const leader of cat.leaders) {
+      const nm = normalize(leader.athlete.displayName);
+      const m  = leader.displayValue.match(/Goals:\s*(\d+)/);
+      if (m) GOAL_COUNTS[nm] = parseInt(m[1]);
+    }
+    renderBonus();
+  } catch(e) { /* silently ignore */ }
+}
+
 function renderBonus() {
   document.getElementById('bonus-grid').innerHTML = ['goleador','campeon'].map(key => {
     const b = BONUS[key];
@@ -876,13 +930,53 @@ function renderBonus() {
         ? `<div class="bonus-result-tag">${scored ? '+' + b.pts + ' pts ✅' : '0 pts'}</div>`
         : '';
 
+      // Goal count badge (goleador only)
+      let goalBadge = '';
+      if (isGoleador) {
+        const goals = getPlayerGoals(pred);
+        if (goals !== null) {
+          const maxGoals = Math.max(...Object.values(GOAL_COUNTS), 0);
+          const isTop = goals > 0 && goals === maxGoals;
+          goalBadge = `<div class="goal-badge${isTop ? ' top' : ''}">⚽ ${goals} gol${goals !== 1 ? 'es' : ''}</div>`;
+        }
+      }
+
       return `<div class="bonus-card ${isWinner ? 'bonus-winner' : ''}">
         ${imgHtml}
         <div class="bonus-player">${name.split(' ')[0]}</div>
         <div class="bonus-name" style="font-size:0.8rem">${pred}</div>
+        ${goalBadge}
         ${ptsBadge}
       </div>`;
     }).join('');
+
+    // Mini goal-leader ranking for goleador section
+    let goalTableHtml = '';
+    if (isGoleador && Object.keys(GOAL_COUNTS).length > 0) {
+      const uniquePreds = [...new Set(b.predictions.map(p => normalize(p)))];
+      const ranked = uniquePreds
+        .map(norm => {
+          const espn  = GOLEADOR_TO_ESPN[norm] || norm;
+          const goals = GOAL_COUNTS[espn] ?? GOAL_COUNTS[norm] ?? 0;
+          const displayName = b.predictions.find(p => normalize(p) === norm) || norm;
+          return { displayName, goals };
+        })
+        .sort((a, b) => b.goals - a.goals);
+
+      const rankCls = ['g1','g2','g3'];
+      const rows = ranked.map((r, i) =>
+        `<div class="goal-row">
+          <span class="goal-rank ${rankCls[i]||''}">${i+1}.</span>
+          <span class="goal-pname">${r.displayName}</span>
+          <span class="goal-count">⚽ ${r.goals}</span>
+        </div>`
+      ).join('');
+
+      goalTableHtml = `<div class="goal-table">
+        <div style="font-size:0.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Goles en el torneo</div>
+        ${rows}
+      </div>`;
+    }
 
     const resultTag = b.result
       ? `<span style="font-size:0.75rem;color:var(--accent2);font-weight:600;margin-left:0.5rem">
@@ -896,6 +990,7 @@ function renderBonus() {
         <span class="bonus-pts-badge">${b.pts} pts</span>
         ${resultTag}
       </div>
+      ${goalTableHtml}
       <div class="bonus-grid">${cards}</div>
     </div>`;
   }).join('');
@@ -1053,6 +1148,9 @@ async function loadLiveScores(showFeedback = false) {
     btn.disabled = false;
     btn.textContent = '🔄 Actualizar marcadores';
   }
+  // Also refresh goal leaders
+  fetchGoalLeaders();
+
   if (showFeedback) {
     showToast(updated > 0 ? `✅ ${updated} resultado${updated>1?'s':''} actualizado${updated>1?'s':''}` : 'Sin cambios nuevos');
   }
@@ -1072,8 +1170,9 @@ renderMatches();
 renderBonus();
 renderPrizes();
 updateDate();
-// Fetch live scores on load (non-blocking)
+// Fetch live scores and goal leaders on load (non-blocking)
 loadLiveScores(false);
+fetchGoalLeaders();
 </script>
 </body>
 </html>
