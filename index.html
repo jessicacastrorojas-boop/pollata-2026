@@ -947,38 +947,58 @@ function renderGoalLeaderSection() {
   const inner   = document.getElementById('goal-leader-inner');
   if (!section || !inner || GOAL_LEADERS_DATA.length === 0) return;
 
-  const maxGoals = GOAL_LEADERS_DATA[0].goals;
-  const leaders  = GOAL_LEADERS_DATA.filter(l => l.goals === maxGoals);
-  const tiedNote = leaders.length > 1
-    ? `<span class="leader-tied">(empate ${leaders.length})</span>` : '';
+  // Build ranked tiers: group players by goal count, keep top 3 tiers
+  const tiers = [];
+  let lastGoals = -1;
+  for (const l of GOAL_LEADERS_DATA) {
+    if (l.goals !== lastGoals) {
+      tiers.push({ goals: l.goals, players: [] });
+      lastGoals = l.goals;
+    }
+    tiers[tiers.length - 1].players.push(l);
+    if (tiers.length === 3 && tiers[tiers.length-1].players.length >= 1) break;
+  }
+  // Ensure we have exactly up to 3 tiers
+  const top3Tiers = tiers.slice(0, 3);
 
-  const cards = leaders.slice(0, 3).map((l, i) => {
-    const flagUrl = l.teamLogo ||
-      (l.teamAbbr ? `https://flagcdn.com/w40/${l.teamAbbr}.png` : '');
-    const flagImg = flagUrl
-      ? `<img src="${flagUrl}" class="leader-flag-sm" alt="${l.teamName}" onerror="this.style.display='none'">`
-      : '';
-    const photo = l.headshotUrl
-      ? `<img src="${l.headshotUrl}" class="leader-photo" alt="${l.name}" onerror="this.style.background='#1a3d22'">`
-      : `<div class="leader-photo" style="display:flex;align-items:center;justify-content:center;font-size:1.8rem">⚽</div>`;
+  const medals  = ['🥇', '🥈', '🥉'];
+  const tierLabels = ['Líder goleador del Mundial 2026', '2.º puesto', '3.er puesto'];
 
-    return `<div class="leader-card" style="${i > 0 ? 'margin-top:0.6rem;padding-top:0.6rem;border-top:1px solid #1a3d22' : ''}">
-      <div class="leader-crown">${i === 0 ? '🥇' : i === 1 ? '🥈' : '🥉'}</div>
-      ${photo}
-      <div class="leader-info">
-        <div class="leader-title">Líder goleador del Mundial 2026 ${i === 0 ? tiedNote : ''}</div>
-        <div class="leader-name">${l.name}</div>
-        <div class="leader-team">${flagImg}${l.teamName}</div>
-        <div class="leader-stats">
-          <span class="leader-stat gold">⚽ ${l.goals} gol${l.goals !== 1 ? 'es' : ''}</span>
-          ${l.assists > 0 ? `<span class="leader-stat">🎯 ${l.assists} asist.</span>` : ''}
-          <span class="leader-stat">📋 ${l.matches} PJ</span>
+  const html = top3Tiers.map((tier, tierIdx) => {
+    const pos   = tierIdx + 1;
+    const medal = medals[tierIdx] || `${pos}.`;
+    const tied  = tier.players.length > 1
+      ? `<span class="leader-tied">(${tier.players.length} empatados)</span>` : '';
+
+    const playerCards = tier.players.map((l, pi) => {
+      const flagUrl = l.teamLogo || (l.teamAbbr ? `https://flagcdn.com/w40/${l.teamAbbr}.png` : '');
+      const flagImg = flagUrl
+        ? `<img src="${flagUrl}" class="leader-flag-sm" alt="${l.teamName}" onerror="this.style.display='none'">`
+        : '';
+      const photo = l.headshotUrl
+        ? `<img src="${l.headshotUrl}" class="leader-photo" alt="${l.name}" onerror="this.style.background='#1a3d22'">`
+        : `<div class="leader-photo" style="display:flex;align-items:center;justify-content:center;font-size:1.8rem">⚽</div>`;
+
+      return `<div class="leader-card" style="${pi > 0 ? 'margin-top:0.45rem;padding-top:0.45rem;border-top:1px solid #0d2a18' : ''}">
+        <div class="leader-crown" style="${tierIdx > 0 ? 'font-size:1.1rem' : ''}">${pi === 0 ? medal : ''}</div>
+        ${photo}
+        <div class="leader-info">
+          ${pi === 0 ? `<div class="leader-title">${tierLabels[tierIdx]} ${tied}</div>` : ''}
+          <div class="leader-name" style="${tierIdx > 0 ? 'font-size:0.9rem' : ''}">${l.name}</div>
+          <div class="leader-team">${flagImg}${l.teamName}</div>
+          <div class="leader-stats">
+            <span class="leader-stat${tierIdx === 0 ? ' gold' : ''}">⚽ ${l.goals} gol${l.goals !== 1 ? 'es' : ''}</span>
+            ${l.assists > 0 ? `<span class="leader-stat">🎯 ${l.assists}</span>` : ''}
+            <span class="leader-stat">📋 ${l.matches} PJ</span>
+          </div>
         </div>
-      </div>
-    </div>`;
+      </div>`;
+    }).join('');
+
+    return `<div style="${tierIdx > 0 ? 'margin-top:0.7rem;padding-top:0.7rem;border-top:1px solid #1a3d22' : ''}">${playerCards}</div>`;
   }).join('');
 
-  inner.innerHTML = cards;
+  inner.innerHTML = html;
   section.style.display = 'block';
 }
 
