@@ -956,13 +956,12 @@ function renderGoalLeaderSection() {
       lastGoals = l.goals;
     }
     tiers[tiers.length - 1].players.push(l);
-    if (tiers.length === 3 && tiers[tiers.length-1].players.length >= 1) break;
+    if (tiers.length === 5 && tiers[tiers.length-1].players.length >= 1) break;
   }
-  // Ensure we have exactly up to 3 tiers
-  const top3Tiers = tiers.slice(0, 3);
+  const top3Tiers = tiers.slice(0, 5);
 
-  const medals  = ['🥇', '🥈', '🥉'];
-  const tierLabels = ['Líder goleador del Mundial 2026', '2.º puesto', '3.er puesto'];
+  const medals     = ['🥇', '🥈', '🥉', '4.º', '5.º'];
+  const tierLabels = ['Líder goleador del Mundial 2026', '2.º puesto', '3.er puesto', '4.º puesto', '5.º puesto'];
 
   const html = top3Tiers.map((tier, tierIdx) => {
     const pos   = tierIdx + 1;
