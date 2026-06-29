@@ -653,6 +653,7 @@ function renderPrizes() {
 let openPlayerIdx = null;
 
 function openPlayerDetail(playerIdx, rowEl) {
+  try {
   closePlayerDetail();
   openPlayerIdx = playerIdx;
 
@@ -787,6 +788,10 @@ function openPlayerDetail(playerIdx, rowEl) {
   newRow.appendChild(td);
   rowEl.parentNode.insertBefore(newRow, rowEl.nextSibling);
   rowEl.querySelector('.chevron').textContent = '▲';
+  } catch(e) {
+    alert('Error al abrir panel: ' + e.message);
+    openPlayerIdx = null;
+  }
 }
 
 function closePlayerDetail() {
