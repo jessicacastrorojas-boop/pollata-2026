@@ -192,6 +192,19 @@
     .bonus-result-tag { font-size: 0.7rem; margin-top: 0.35rem; color: var(--accent2); font-weight: 700; }
     .goal-badge { display: inline-flex; align-items: center; gap: 3px; background: #064e3b; color: #6ee7b7; border-radius: 20px; padding: 2px 9px; font-size: 0.72rem; font-weight: 800; margin: 0.3rem auto 0; }
     .goal-badge.top { background: #78350f; color: #fcd34d; }
+    /* ── Top scorer banner ── */
+    .leader-card { display: flex; align-items: center; gap: 0.85rem; flex-wrap: wrap; }
+    .leader-crown { font-size: 1.5rem; line-height: 1; }
+    .leader-photo { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid #fcd34d; background: #1a3d22; flex-shrink: 0; }
+    .leader-flag-sm { width: 22px; height: 15px; border-radius: 2px; object-fit: cover; vertical-align: middle; margin-right: 4px; }
+    .leader-info { flex: 1; min-width: 120px; }
+    .leader-title { font-size: 0.65rem; font-weight: 700; color: #6ee7b7; text-transform: uppercase; letter-spacing: .07em; }
+    .leader-name { font-size: 1.05rem; font-weight: 800; color: #fff; line-height: 1.2; }
+    .leader-team { font-size: 0.8rem; color: #a7f3d0; margin-top: 2px; }
+    .leader-stats { display: flex; gap: 0.6rem; margin-top: 0.35rem; flex-wrap: wrap; }
+    .leader-stat { background: #064e3b; color: #6ee7b7; border-radius: 20px; padding: 2px 10px; font-size: 0.75rem; font-weight: 800; }
+    .leader-stat.gold { background: #78350f; color: #fcd34d; }
+    .leader-tied { font-size: 0.72rem; color: #a7f3d0; margin-left: 0.5rem; font-style: italic; }
     .goal-table { display: flex; flex-direction: column; gap: 4px; margin: 0.5rem 0 0.75rem; padding: 0.6rem 0.75rem; background: #0a1a12; border: 1px solid #1a3d22; border-radius: 8px; font-size: 0.78rem; }
     .goal-row { display: flex; align-items: center; gap: 0.5rem; padding: 2px 0; }
     .goal-rank { width: 1.1rem; text-align: right; font-weight: 700; color: var(--muted); }
@@ -273,6 +286,11 @@
 <div class="progress-bar-wrap">
   <div class="progress-label" id="progress-label">Cargando...</div>
   <div class="progress-track"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+</div>
+
+<!-- Líder goleador del torneo -->
+<div id="goal-leader-section" style="display:none;background:linear-gradient(135deg,#0c1a10 60%,#1a3d22);border-bottom:1px solid #1a3d22;padding:0.85rem 1rem">
+  <div id="goal-leader-inner" style="max-width:680px;margin:0 auto"></div>
 </div>
 
 <div class="container">
@@ -858,7 +876,8 @@ function renderMatches() {
 }
 
 // ── Goal leaders (ESPN API) ─────────────────────────────────────────────────
-let GOAL_COUNTS = {};  // normalized ESPN name → goals
+let GOAL_COUNTS = {};        // normalized ESPN name → goals
+let GOAL_LEADERS_DATA = [];  // full sorted leader objects from ESPN
 
 // Maps our short/alt prediction names → normalized ESPN display name
 const GOLEADOR_TO_ESPN = {
@@ -894,13 +913,73 @@ async function fetchGoalLeaders() {
     const data = await res.json();
     const cat = (data.stats || []).find(s => s.name === 'goalsLeaders');
     if (!cat) return;
+
+    GOAL_LEADERS_DATA = [];
     for (const leader of cat.leaders) {
-      const nm = normalize(leader.athlete.displayName);
-      const m  = leader.displayValue.match(/Goals:\s*(\d+)/);
-      if (m) GOAL_COUNTS[nm] = parseInt(m[1]);
+      const a    = leader.athlete;
+      const nm   = normalize(a.displayName);
+      const mGoals = leader.displayValue.match(/Goals:\s*(\d+)/);
+      const goals  = mGoals ? parseInt(mGoals[1]) : 0;
+      if (mGoals) GOAL_COUNTS[nm] = goals;
+
+      // Collect assists from statistics array
+      const assistStat = (a.statistics || []).find(s => s.name === 'goalAssists');
+      const appStat    = (a.statistics || []).find(s => s.name === 'appearances');
+      GOAL_LEADERS_DATA.push({
+        name:        a.displayName,
+        goals,
+        assists:     assistStat ? parseInt(assistStat.value) : 0,
+        matches:     appStat    ? parseInt(appStat.value)    : 0,
+        headshotUrl: a.headshot?.href || '',
+        teamName:    a.team?.displayName || '',
+        teamLogo:    a.team?.logos?.[0]?.href || '',
+        teamAbbr:    a.team?.abbreviation?.toLowerCase() || '',
+      });
     }
+
+    renderGoalLeaderSection();
     renderBonus();
   } catch(e) { /* silently ignore */ }
+}
+
+function renderGoalLeaderSection() {
+  const section = document.getElementById('goal-leader-section');
+  const inner   = document.getElementById('goal-leader-inner');
+  if (!section || !inner || GOAL_LEADERS_DATA.length === 0) return;
+
+  const maxGoals = GOAL_LEADERS_DATA[0].goals;
+  const leaders  = GOAL_LEADERS_DATA.filter(l => l.goals === maxGoals);
+  const tiedNote = leaders.length > 1
+    ? `<span class="leader-tied">(empate ${leaders.length})</span>` : '';
+
+  const cards = leaders.slice(0, 3).map((l, i) => {
+    const flagUrl = l.teamLogo ||
+      (l.teamAbbr ? `https://flagcdn.com/w40/${l.teamAbbr}.png` : '');
+    const flagImg = flagUrl
+      ? `<img src="${flagUrl}" class="leader-flag-sm" alt="${l.teamName}" onerror="this.style.display='none'">`
+      : '';
+    const photo = l.headshotUrl
+      ? `<img src="${l.headshotUrl}" class="leader-photo" alt="${l.name}" onerror="this.style.background='#1a3d22'">`
+      : `<div class="leader-photo" style="display:flex;align-items:center;justify-content:center;font-size:1.8rem">⚽</div>`;
+
+    return `<div class="leader-card" style="${i > 0 ? 'margin-top:0.6rem;padding-top:0.6rem;border-top:1px solid #1a3d22' : ''}">
+      <div class="leader-crown">${i === 0 ? '🥇' : i === 1 ? '🥈' : '🥉'}</div>
+      ${photo}
+      <div class="leader-info">
+        <div class="leader-title">Líder goleador del Mundial 2026 ${i === 0 ? tiedNote : ''}</div>
+        <div class="leader-name">${l.name}</div>
+        <div class="leader-team">${flagImg}${l.teamName}</div>
+        <div class="leader-stats">
+          <span class="leader-stat gold">⚽ ${l.goals} gol${l.goals !== 1 ? 'es' : ''}</span>
+          ${l.assists > 0 ? `<span class="leader-stat">🎯 ${l.assists} asist.</span>` : ''}
+          <span class="leader-stat">📋 ${l.matches} PJ</span>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  inner.innerHTML = cards;
+  section.style.display = 'block';
 }
 
 function renderBonus() {
