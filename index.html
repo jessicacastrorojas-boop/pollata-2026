@@ -681,7 +681,7 @@ function openPlayerDetail(playerIdx, rowEl) {
     const cardCls = isPlayed ? 'match-played' : isToday ? 'match-today' : 'match-pending';
     const resultInfo = isPlayed
       ? `<span class="dm-result">Resultado: ${m.result[0]}–${m.result[1]}</span>`
-      : `<span class="dm-result">${isToday ? '🔴 Hoy' : formatDate(m.date)}</span>`;
+      : `<span class="dm-result">${isToday ? '🔴 Hoy' : formatDateTime(m.id)}</span>`;
     return `
       <div class="detail-match ${cardCls}">
         <div><div class="dm-teams">${m.team1} vs ${m.team2}</div>${resultInfo}</div>
