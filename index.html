@@ -288,32 +288,13 @@
   <div class="progress-track"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
 </div>
 
-<!-- Líder goleador del torneo -->
-<div id="goal-leader-section" style="display:none;background:linear-gradient(135deg,#0c1a10 60%,#1a3d22);border-bottom:1px solid #1a3d22;padding:0.85rem 1rem">
-  <div id="goal-leader-inner" style="max-width:680px;margin:0 auto"></div>
-</div>
-
 <div class="container">
 
   <div class="note-box">
     ℹ️ <strong>Puntuación:</strong> Marcador exacto <strong>10 pts</strong> · Resultado correcto <strong>5 pts</strong> · Goleador del Mundial <strong>20 pts</strong> · Campeón del Mundial <strong>40 pts</strong> · Solo 90 minutos. Toca el nombre de un participante para ver sus predicciones.
   </div>
 
-  <!-- ═══ PREMIOS ═══ -->
-  <div class="section-title">💰 Premios — Ganadores actuales</div>
-  <div class="prize-section">
-    <div class="prize-top">
-      <div class="prize-title">🏆 ¿Quién ganaría hoy?</div>
-      <div class="prize-pot-fixed">
-        <span class="prize-pot-label">Premio total:</span>
-        <strong>$840.000 COP</strong>
-      </div>
-    </div>
-    <div class="prize-podium" id="prize-podium"></div>
-    <div class="prize-note" id="prize-note"></div>
-  </div>
-
-  <!-- ═══ STANDINGS ═══ -->
+  <!-- ═══ 1. STANDINGS ═══ -->
   <div class="section-title">🏅 Tabla de posiciones acumulada</div>
   <table class="standings" id="standings-table">
     <thead>
@@ -328,11 +309,25 @@
     <tbody id="standings-body"></tbody>
   </table>
 
-  <!-- ═══ MATCHES ═══ -->
+  <!-- ═══ 2. MATCHES ═══ -->
   <div class="section-title">⚽ Partidos 16avos de Final</div>
   <div id="matches-container"></div>
 
-  <!-- ═══ BONUS ═══ -->
+  <!-- ═══ 3. PREMIOS ═══ -->
+  <div class="section-title">💰 Premios — Ganadores actuales</div>
+  <div class="prize-section">
+    <div class="prize-top">
+      <div class="prize-title">🏆 ¿Quién ganaría hoy?</div>
+      <div class="prize-pot-fixed">
+        <span class="prize-pot-label">Premio total:</span>
+        <strong>$840.000 COP</strong>
+      </div>
+    </div>
+    <div class="prize-podium" id="prize-podium"></div>
+    <div class="prize-note" id="prize-note"></div>
+  </div>
+
+  <!-- ═══ 4. BONUS ═══ -->
   <div class="section-title">🎯 Predicciones especiales</div>
   <div class="bonus-grid" id="bonus-grid"></div>
 
@@ -937,7 +932,6 @@ async function fetchGoalLeaders() {
       });
     }
 
-    renderGoalLeaderSection();
     renderBonus();
   } catch(e) { /* silently ignore */ }
 }
@@ -1050,30 +1044,35 @@ function renderBonus() {
       </div>`;
     }).join('');
 
-    // Mini goal-leader ranking for goleador section
+    // Top-2 goal scorers of the full tournament (regardless of predictions)
     let goalTableHtml = '';
-    if (isGoleador && Object.keys(GOAL_COUNTS).length > 0) {
-      const uniquePreds = [...new Set(b.predictions.map(p => normalize(p)))];
-      const ranked = uniquePreds
-        .map(norm => {
-          const espn  = GOLEADOR_TO_ESPN[norm] || norm;
-          const goals = GOAL_COUNTS[espn] ?? GOAL_COUNTS[norm] ?? 0;
-          const displayName = b.predictions.find(p => normalize(p) === norm) || norm;
-          return { displayName, goals };
-        })
-        .sort((a, b) => b.goals - a.goals);
+    if (isGoleador && GOAL_LEADERS_DATA.length > 0) {
+      // Build top-2 tiers from full ESPN leaderboard
+      const tiers = [];
+      let lastG = -1;
+      for (const l of GOAL_LEADERS_DATA) {
+        if (l.goals !== lastG) { tiers.push({ goals: l.goals, players: [] }); lastG = l.goals; }
+        tiers[tiers.length - 1].players.push(l);
+        if (tiers.length === 2) break;
+      }
 
-      const rankCls = ['g1','g2','g3'];
-      const rows = ranked.map((r, i) =>
-        `<div class="goal-row">
-          <span class="goal-rank ${rankCls[i]||''}">${i+1}.</span>
-          <span class="goal-pname">${r.displayName}</span>
-          <span class="goal-count">⚽ ${r.goals}</span>
-        </div>`
-      ).join('');
+      const medals2 = ['🥇','🥈'];
+      const rows = tiers.map((tier, ti) => {
+        const names = tier.players.map(p => {
+          const flagUrl = p.teamLogo || (p.teamAbbr ? `https://flagcdn.com/w20/${p.teamAbbr}.png` : '');
+          const flag = flagUrl ? `<img src="${flagUrl}" style="width:16px;height:11px;border-radius:2px;object-fit:cover;vertical-align:middle;margin-right:3px" onerror="this.style.display='none'">` : '';
+          return `${flag}${p.name}`;
+        }).join('<span style="color:var(--muted)"> · </span>');
+        const tied = tier.players.length > 1 ? `<span style="font-size:0.65rem;color:var(--muted);margin-left:3px">(${tier.players.length})</span>` : '';
+        return `<div class="goal-row">
+          <span class="goal-rank ${ti===0?'g1':'g2'}">${medals2[ti]}</span>
+          <span class="goal-pname" style="flex:1;min-width:0">${names}${tied}</span>
+          <span class="goal-count">⚽ ${tier.goals}</span>
+        </div>`;
+      }).join('');
 
       goalTableHtml = `<div class="goal-table">
-        <div style="font-size:0.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Goles en el torneo</div>
+        <div style="font-size:0.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Top goleadores del torneo</div>
         ${rows}
       </div>`;
     }
