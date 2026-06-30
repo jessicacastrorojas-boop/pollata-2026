@@ -881,9 +881,10 @@ function renderStandings() {
     .map((name, i) => ({ name, i, p1: PHASE1_PTS[i], mp: matchPts(i), bp: bonusPts(i), tot: totalPts(i) }))
     .sort((a, b) => b.tot - a.tot);
 
-  // Assign real positions considering ties (position = 1 + number of players with strictly more points)
+  // Dense ranking: position = rank among unique score tiers (1, 2, 2, 3 — not 1, 2, 2, 4)
+  const uniqueTotals = [...new Set(standings.map(p => p.tot))].sort((a, b) => b - a);
   standings.forEach(p => {
-    p.pos = 1 + standings.filter(q => q.tot > p.tot).length;
+    p.pos = uniqueTotals.indexOf(p.tot) + 1;
   });
 
   const medals = { 1: '🥇', 2: '🥈', 3: '🥉' };
