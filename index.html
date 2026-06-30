@@ -665,7 +665,7 @@ function openPlayerDetail(playerIdx, rowEl) {
   closePlayerDetail();
   openPlayerIdx = playerIdx;
 
-  const today = new Date(new Date().toLocaleString('en-CA', {timeZone:'America/Bogota'})).toISOString().slice(0,10);
+  const today = new Date().toLocaleDateString('en-CA', {timeZone:'America/Bogota'});
   const name = PLAYERS[playerIdx];
   const p1   = PHASE1_PTS[playerIdx];
   const mp   = matchPts(playerIdx);
@@ -797,8 +797,18 @@ function openPlayerDetail(playerIdx, rowEl) {
   rowEl.parentNode.insertBefore(newRow, rowEl.nextSibling);
   rowEl.querySelector('.chevron').textContent = '▲';
   } catch(e) {
-    alert('Error al abrir panel: ' + e.message);
+    console.error('openPlayerDetail error:', e);
     openPlayerIdx = null;
+    // Show error inline instead of alert
+    const errRow = document.createElement('tr');
+    errRow.id = `detail-row-${playerIdx}`;
+    errRow.className = 'player-detail-row';
+    const errTd = document.createElement('td');
+    errTd.colSpan = 5;
+    errTd.style.cssText = 'padding:1rem;color:#f87171;background:#1e1e2e;font-size:0.85rem';
+    errTd.textContent = '⚠️ Error al cargar panel: ' + e.message;
+    errRow.appendChild(errTd);
+    rowEl.parentNode.insertBefore(errRow, rowEl.nextSibling);
   }
 }
 
@@ -901,7 +911,7 @@ function flagImg(country, size) {
 }
 
 function renderMatches() {
-  const today = new Date().toLocaleString('en-CA', {timeZone:'America/Bogota'}).slice(0,10);
+  const today = new Date().toLocaleDateString('en-CA', {timeZone:'America/Bogota'});
   const sorted = [...MATCHES].sort((a, b) => matchSortKey(a).localeCompare(matchSortKey(b)));
   document.getElementById('matches-container').innerHTML = sorted.map(m => {
     const played      = m.result[0] !== null;
