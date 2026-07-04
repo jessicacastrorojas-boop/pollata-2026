@@ -782,7 +782,7 @@ function openPlayerDetail(playerIdx, rowEl) {
   const phase16SectionHeader = played16.length > 0
     ? `<div style="font-size:0.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;padding:0.5rem 0.25rem 0.25rem;border-top:1px solid var(--border);margin-top:0.5rem">16avos de Final — ${played16.length} partidos · ${pts16} pts</div>`
     : '';
-  const phase1SectionHeader = `<div style="font-size:0.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;padding:0.5rem 0.25rem 0.25rem;border-top:1px solid var(--border);margin-top:0.5rem">Primera Fase — ${PHASE1_MATCHES.length} partidos · ${phase1pts} pts</div>`;
+  const phase1SectionHeader = `<div style="font-size:0.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;padding:0.5rem 0.25rem 0.25rem;border-top:1px solid var(--border);margin-top:0.5rem">Fase de Grupos — ${PHASE1_MATCHES.length} partidos · ${phase1pts} pts</div>`;
 
   const playedHTML = `
     ${octSectionHeader}
@@ -800,7 +800,7 @@ function openPlayerDetail(playerIdx, rowEl) {
         <div>
           <div class="detail-name">${name}</div>
           <div class="detail-subtitle">
-            ${phase1pts} (1ª) + ${pts16} (16avos) + ${octPts} (octavos) + ${bp} (bonus) = <strong>${tot} total</strong>
+            ${phase1pts} (grupos) + ${pts16} (16avos) + ${octPts} (octavos) + ${bp} (bonus) = <strong>${tot} total</strong>
           </div>
         </div>
         <button class="detail-close" onclick="closePlayerDetail()">✕ Cerrar</button>
