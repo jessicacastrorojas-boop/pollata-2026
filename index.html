@@ -263,7 +263,7 @@
 <div class="header">
   <h1>⚽ Polla Mundialista 2026 — ATA</h1>
   <div class="subtitle">México · Estados Unidos · Canadá</div>
-  <div class="phase-badge">🏆 Segunda Fase — 16avos de Final</div>
+  <div class="phase-badge">🏆 Octavos de Final</div>
 </div>
 
 <!-- Share bar -->
@@ -336,12 +336,21 @@
     <tbody id="standings-body"></tbody>
   </table>
 
-  <!-- ═══ 3. MATCHES ═══ -->
+  <!-- ═══ 3. MATCHES OCT ═══ -->
+  <div class="section-title" id="matches-oct-hdr" onclick="toggleOctSection()" style="cursor:pointer;user-select:none">
+    ⚽ Partidos Octavos de Final
+    <span id="matches-oct-chev" style="font-size:0.7rem;color:var(--muted);font-weight:400;letter-spacing:0;text-transform:none;transition:transform 0.2s;display:inline-block">▼</span>
+  </div>
+  <div class="bonus-collapse-body" id="matches-oct-body">
+    <div id="matches-oct-container" style="padding-top:0.5rem"></div>
+  </div>
+
+  <!-- ═══ 3b. MATCHES 16avos (historical) ═══ -->
   <div class="section-title" id="matches-section-hdr" onclick="toggleMatchesSection()" style="cursor:pointer;user-select:none">
-    ⚽ Partidos 16avos de Final
+    📋 Partidos 16avos de Final (histórico)
     <span id="matches-chev" style="font-size:0.7rem;color:var(--muted);font-weight:400;letter-spacing:0;text-transform:none;transition:transform 0.2s;display:inline-block">▼</span>
   </div>
-  <div class="bonus-collapse-body" id="matches-section-body">
+  <div class="bonus-collapse-body" id="matches-section-body" style="display:none">
     <div id="matches-container" style="padding-top:0.5rem"></div>
   </div>
 
@@ -371,22 +380,40 @@ const PLAYERS = [
 const PHASE1_PTS = [230, 185, 200, 210, 225, 175, 225, 170, 195, 215, 180, 195];
 
 // 56 partidos primera fase — formato: {d:fecha, g:grupo, t1:equipo1, t2:equipo2, r:[goles1,goles2], p:[[pred1,pred2,pts]×12]}
+const MATCHES_OCT = [
+  {id:17,date:'2026-07-04',team1:'Canadá',team2:'Marruecos',result:[null,null],
+   predictions:[[0,2],[0,2],[1,2],[0,2],[2,2],[0,2],[1,2],[1,1],[0,2],[1,2],[0,1],[1,2]]},
+  {id:18,date:'2026-07-04',team1:'Paraguay',team2:'Francia',result:[null,null],
+   predictions:[[1,3],[1,3],[0,3],[0,3],[1,3],[1,2],[0,2],[0,3],[1,2],[0,2],[1,2],[1,3]]},
+  {id:19,date:'2026-07-05',team1:'Brasil',team2:'Noruega',result:[null,null],
+   predictions:[[2,1],[3,0],[2,1],[2,1],[1,2],[1,1],[3,1],[3,0],[1,0],[2,1],[2,1],[2,2]]},
+  {id:20,date:'2026-07-05',team1:'México',team2:'Inglaterra',result:[null,null],
+   predictions:[[1,1],[0,1],[1,2],[1,1],[1,3],[1,2],[1,2],[0,1],[1,0],[1,1],[2,1],[2,1]]},
+  {id:21,date:'2026-07-06',team1:'Portugal',team2:'España',result:[null,null],
+   predictions:[[2,2],[1,2],[1,2],[1,2],[1,3],[1,2],[1,2],[1,3],[1,2],[2,1],[0,2],[1,3]]},
+  {id:22,date:'2026-07-06',team1:'Estados Unidos',team2:'Bélgica',result:[null,null],
+   predictions:[[2,1],[1,2],[2,1],[1,0],[3,2],[0,0],[1,2],[1,0],[2,0],[2,1],[2,1],[2,0]]},
+  {id:23,date:'2026-07-07',team1:'Argentina',team2:'Egipto',result:[null,null],
+   predictions:[[3,1],[3,1],[2,0],[1,1],[2,0],[2,1],[3,0],[3,1],[2,1],[2,0],[2,1],[1,1]]},
+  {id:24,date:'2026-07-07',team1:'Suiza',team2:'Colombia',result:[null,null],
+   predictions:[[1,2],[1,3],[0,2],[1,2],[0,2],[0,2],[1,2],[1,1],[0,1],[0,2],[1,2],[0,1]]}
+];
 const PHASE1_MATCHES = [{"d":"2026-06-16","g":"I","t1":"France","t2":"Senegal","r":[3,1],"p":[[3,1,10],[3,1,10],[3,1,10],[2,1,5],[2,0,5],[2,0,5],[2,0,5],[2,0,5],[1,0,5],[2,1,5],[2,0,5],[2,1,5]]},{"d":"2026-06-16","g":"I","t1":"Iraq","t2":"Norway","r":[1,4],"p":[[0,3,5],[1,1,0],[1,3,5],[0,2,5],[0,2,5],[1,0,0],[1,1,0],[0,2,5],[1,1,0],[0,1,5],[0,1,5],[0,2,5]]},{"d":"2026-06-16","g":"J","t1":"Argentina","t2":"Algeria","r":[3,0],"p":[[1,0,5],[3,1,5],[3,0,10],[3,0,10],[3,0,10],[2,0,5],[3,0,10],[2,0,5],[4,1,5],[2,0,5],[3,1,5],[3,1,5]]},{"d":"2026-06-17","g":"J","t1":"Austria","t2":"Jordan","r":[3,1],"p":[[2,0,5],[2,1,5],[2,1,5],[2,1,5],[3,0,5],[1,1,0],[2,0,5],[1,1,0],[3,1,10],[2,1,5],[3,0,5],[2,1,5]]},{"d":"2026-06-17","g":"K","t1":"Portugal","t2":"DR Congo","r":[1,1],"p":[[3,1,0],[3,1,0],[3,0,0],[2,1,0],[3,0,0],[2,0,0],[3,0,0],[4,0,0],[4,1,0],[2,0,0],[2,0,0],[4,0,0]]},{"d":"2026-06-17","g":"L","t1":"England","t2":"Croatia","r":[4,2],"p":[[1,1,0],[2,1,5],[2,1,5],[1,1,0],[2,1,5],[2,1,5],[2,1,5],[2,1,5],[2,1,5],[2,2,0],[2,1,5],[1,1,0]]},{"d":"2026-06-17","g":"L","t1":"Ghana","t2":"Panama","r":[1,0],"p":[[2,1,5],[2,0,5],[3,0,5],[2,1,5],[1,1,0],[1,1,0],[2,0,5],[1,1,0],[2,1,5],[1,0,10],[2,0,5],[1,2,0]]},{"d":"2026-06-17","g":"K","t1":"Uzbekistan","t2":"Colombia","r":[1,3],"p":[[0,2,5],[0,2,5],[0,2,5],[1,3,10],[0,2,5],[1,2,5],[0,2,5],[1,1,0],[1,3,10],[0,1,5],[1,2,5],[0,3,5]]},{"d":"2026-06-18","g":"A","t1":"Czechia","t2":"South Africa","r":[1,1],"p":[[1,0,0],[3,0,0],[1,1,10],[2,1,0],[2,0,0],[1,2,0],[1,1,10],[0,1,0],[1,1,10],[1,0,0],[2,1,0],[1,0,0]]},{"d":"2026-06-18","g":"B","t1":"Switzerland","t2":"Bosnia and Herzegovina","r":[4,1],"p":[[2,1,5],[2,0,5],[3,0,5],[1,1,0],[2,0,5],[0,0,0],[1,0,5],[3,1,5],[1,2,0],[1,1,0],[2,1,5],[3,1,5]]},{"d":"2026-06-18","g":"B","t1":"Canada","t2":"Qatar","r":[6,0],"p":[[1,0,5],[3,1,5],[2,1,5],[2,1,5],[2,0,5],[1,0,5],[2,1,5],[1,2,0],[1,2,0],[2,1,5],[2,1,5],[1,0,5]]},{"d":"2026-06-18","g":"A","t1":"Mexico","t2":"South Korea","r":[1,0],"p":[[2,2,0],[2,1,5],[2,1,5],[1,0,10],[2,1,5],[1,1,0],[2,1,5],[1,2,0],[2,1,5],[1,1,0],[1,1,0],[1,1,0]]},{"d":"2026-06-19","g":"D","t1":"United States","t2":"Australia","r":[2,0],"p":[[2,0,10],[2,1,5],[3,1,5],[2,1,5],[2,1,5],[2,0,10],[2,0,10],[2,1,5],[3,1,5],[2,1,5],[2,1,5],[2,2,0]]},{"d":"2026-06-19","g":"C","t1":"Scotland","t2":"Morocco","r":[0,1],"p":[[0,2,5],[1,1,0],[2,2,0],[1,1,0],[0,2,5],[0,2,5],[1,2,5],[1,2,5],[0,1,10],[0,1,10],[1,1,0],[0,0,0]]},{"d":"2026-06-19","g":"C","t1":"Brazil","t2":"Haiti","r":[3,0],"p":[[3,0,10],[4,0,5],[4,0,5],[3,1,5],[4,0,5],[2,0,5],[4,0,5],[4,0,5],[2,0,5],[3,0,10],[2,0,5],[3,0,10]]},{"d":"2026-06-19","g":"D","t1":"Turkey","t2":"Paraguay","r":[0,1],"p":[[2,1,0],[1,1,0],[1,1,0],[1,1,0],[1,1,0],[1,1,0],[1,1,0],[1,2,5],[1,0,0],[1,1,0],[2,1,0],[1,2,5]]},{"d":"2026-06-20","g":"F","t1":"Netherlands","t2":"Sweden","r":[5,1],"p":[[2,1,5],[2,1,5],[2,1,5],[2,0,5],[2,0,5],[2,1,5],[1,1,0],[2,2,0],[1,1,0],[2,1,5],[2,0,5],[2,0,5]]},{"d":"2026-06-20","g":"E","t1":"Germany","t2":"Ivory Coast","r":[2,1],"p":[[3,1,5],[4,1,5],[4,0,5],[2,1,10],[3,1,5],[4,0,5],[2,0,5],[2,0,5],[2,0,5],[3,1,5],[2,1,10],[3,1,5]]},{"d":"2026-06-20","g":"E","t1":"Ecuador","t2":"Curacao","r":[0,0],"p":[[2,1,0],[3,0,0],[3,1,0],[3,0,0],[3,0,0],[2,1,0],[2,0,0],[2,0,0],[1,0,0],[2,1,0],[3,1,0],[2,0,0]]},{"d":"2026-06-21","g":"F","t1":"Tunisia","t2":"Japan","r":[0,4],"p":[[0,2,5],[0,3,5],[2,2,0],[1,2,5],[0,2,5],[0,1,5],[1,2,5],[1,3,5],[1,1,0],[1,2,5],[0,2,5],[0,1,5]]},{"d":"2026-06-21","g":"H","t1":"Spain","t2":"Saudi Arabia","r":[4,0],"p":[[2,0,5],[4,1,5],[3,1,5],[2,0,5],[3,0,5],[2,0,5],[3,1,5],[3,1,5],[2,0,5],[1,0,5],[2,1,5],[3,0,5]]},{"d":"2026-06-21","g":"G","t1":"Belgium","t2":"Iran","r":[0,0],"p":[[3,0,0],[2,1,0],[3,1,0],[2,1,0],[2,0,0],[2,2,5],[3,1,0],[2,0,0],[3,1,0],[2,1,0],[3,2,0],[1,1,5]]},{"d":"2026-06-21","g":"H","t1":"Uruguay","t2":"Cape Verde","r":[2,2],"p":[[1,0,0],[2,1,0],[3,0,0],[1,1,5],[3,0,0],[1,0,0],[2,0,0],[2,0,0],[2,1,0],[1,0,0],[1,2,0],[3,0,0]]},{"d":"2026-06-21","g":"G","t1":"New Zealand","t2":"Egypt","r":[1,3],"p":[[1,2,5],[1,2,5],[2,2,0],[1,1,0],[0,1,5],[2,0,0],[0,1,5],[2,2,0],[1,1,0],[1,2,5],[1,0,0],[3,1,0]]},{"d":"2026-06-22","g":"J","t1":"Argentina","t2":"Austria","r":[2,0],"p":[[2,1,5],[3,1,5],[2,1,5],[2,1,5],[2,0,10],[2,0,10],[2,0,10],[3,1,5],[2,0,10],[3,1,5],[2,1,5],[2,1,5]]},{"d":"2026-06-22","g":"I","t1":"France","t2":"Iraq","r":[3,0],"p":[[4,1,5],[3,0,10],[4,0,5],[2,0,5],[4,0,5],[3,0,10],[3,0,10],[3,0,10],[2,0,5],[4,1,5],[2,1,5],[4,1,5]]},{"d":"2026-06-22","g":"I","t1":"Norway","t2":"Senegal","r":[3,2],"p":[[3,2,10],[1,2,0],[1,2,0],[2,0,5],[2,1,5],[1,1,0],[1,1,0],[2,1,5],[0,1,0],[1,0,5],[2,0,5],[3,2,10]]},{"d":"2026-06-22","g":"J","t1":"Jordan","t2":"Algeria","r":[1,2],"p":[[1,2,10],[1,3,5],[1,1,0],[1,1,0],[0,2,5],[0,0,0],[0,2,5],[1,2,10],[1,2,10],[1,1,0],[2,1,0],[1,1,0]]},{"d":"2026-06-23","g":"K","t1":"Portugal","t2":"Uzbekistan","r":[5,0],"p":[[3,0,5],[4,1,5],[4,0,5],[2,0,5],[3,0,5],[2,0,5],[3,1,5],[4,1,5],[4,1,5],[3,1,5],[2,1,5],[4,1,5]]},{"d":"2026-06-23","g":"L","t1":"England","t2":"Ghana","r":[0,0],"p":[[3,1,0],[3,0,0],[3,1,0],[2,0,0],[3,0,0],[3,0,0],[2,1,0],[3,0,0],[2,1,0],[1,0,0],[3,1,0],[4,2,0]]},{"d":"2026-06-23","g":"L","t1":"Panama","t2":"Croatia","r":[0,1],"p":[[0,2,5],[0,4,5],[0,2,5],[1,2,5],[0,2,5],[0,2,5],[1,2,5],[0,2,5],[0,1,10],[1,3,5],[1,2,5],[0,2,5]]},{"d":"2026-06-23","g":"K","t1":"Colombia","t2":"DR Congo","r":[1,0],"p":[[1,1,0],[3,1,5],[2,0,5],[2,0,5],[2,0,5],[3,0,5],[2,0,5],[2,1,5],[2,2,0],[2,1,5],[3,0,5],[2,0,5]]},{"d":"2026-06-24","g":"B","t1":"Switzerland","t2":"Canada","r":[2,1],"p":[[2,1,10],[1,1,0],[2,2,0],[1,2,0],[1,1,0],[1,2,0],[1,1,0],[2,2,0],[2,1,10],[1,1,0],[1,2,0],[2,1,10]]},{"d":"2026-06-24","g":"B","t1":"Bosnia and Herzegovina","t2":"Qatar","r":[3,1],"p":[[1,1,0],[1,2,0],[1,1,0],[1,1,0],[2,0,5],[1,1,0],[2,1,5],[1,2,0],[1,2,0],[1,0,5],[1,2,0],[3,1,10]]},{"d":"2026-06-24","g":"C","t1":"Scotland","t2":"Brazil","r":[0,3],"p":[[0,2,5],[1,3,5],[1,3,5],[1,2,5],[0,3,10],[0,2,5],[0,2,5],[1,3,5],[0,2,5],[1,3,5],[1,2,5],[2,4,5]]},{"d":"2026-06-24","g":"C","t1":"Morocco","t2":"Haiti","r":[4,2],"p":[[3,0,5],[4,1,5],[3,0,5],[3,0,5],[3,0,5],[2,0,5],[3,0,5],[2,0,5],[1,0,5],[2,0,5],[2,0,5],[4,0,5]]},{"d":"2026-06-24","g":"A","t1":"Czechia","t2":"Mexico","r":[0,3],"p":[[0,1,5],[2,2,0],[1,2,5],[1,2,5],[1,2,5],[0,1,5],[1,2,5],[1,2,5],[1,2,5],[0,1,5],[1,2,5],[2,2,0]]},{"d":"2026-06-24","g":"A","t1":"South Africa","t2":"South Korea","r":[1,0],"p":[[0,2,0],[1,4,0],[1,1,0],[1,2,0],[0,2,0],[2,1,5],[1,2,0],[1,3,0],[1,2,0],[0,2,0],[1,1,0],[1,1,0]]},{"d":"2026-06-25","g":"E","t1":"Ecuador","t2":"Germany","r":[2,1],"p":[[0,3,0],[1,3,0],[1,3,0],[1,2,0],[1,3,0],[1,2,0],[1,2,0],[2,4,0],[0,2,0],[1,3,0],[1,2,0],[1,3,0]]},{"d":"2026-06-25","g":"E","t1":"Curacao","t2":"Ivory Coast","r":[0,2],"p":[[1,2,5],[0,3,5],[0,1,5],[1,3,5],[0,2,10],[1,2,5],[0,2,10],[2,2,0],[0,1,5],[1,3,5],[0,3,5],[1,4,5]]},{"d":"2026-06-25","g":"F","t1":"Tunisia","t2":"Netherlands","r":[1,3],"p":[[0,3,5],[1,4,5],[1,2,5],[1,3,10],[0,2,5],[1,1,0],[0,2,5],[0,2,5],[0,2,5],[1,2,5],[1,2,5],[1,2,5]]},{"d":"2026-06-25","g":"F","t1":"Japan","t2":"Sweden","r":[1,1],"p":[[2,2,5],[2,1,0],[1,3,0],[1,1,10],[1,1,10],[2,1,0],[1,2,0],[3,2,0],[1,2,0],[2,2,5],[1,2,0],[2,1,0]]},{"d":"2026-06-25","g":"D","t1":"Turkey","t2":"United States","r":[3,2],"p":[[1,1,0],[1,3,0],[1,3,0],[1,2,0],[1,2,0],[1,2,0],[1,2,0],[1,3,0],[1,3,0],[0,1,0],[1,2,0],[1,4,0]]},{"d":"2026-06-25","g":"D","t1":"Paraguay","t2":"Australia","r":[0,0],"p":[[1,0,0],[1,1,5],[2,1,0],[1,2,0],[1,0,0],[1,1,5],[2,1,0],[3,1,0],[0,1,0],[1,1,5],[0,2,0],[3,0,0]]},{"d":"2026-06-26","g":"I","t1":"Norway","t2":"France","r":[1,4],"p":[[1,1,0],[1,2,5],[1,3,5],[1,2,5],[1,2,5],[0,2,5],[0,2,5],[1,2,5],[0,2,5],[1,3,5],[1,3,5],[2,3,5]]},{"d":"2026-06-26","g":"I","t1":"Senegal","t2":"Iraq","r":[5,0],"p":[[3,1,5],[3,1,5],[3,1,5],[1,1,0],[2,0,5],[2,1,5],[2,0,5],[2,0,5],[1,1,0],[2,0,5],[1,2,0],[2,0,5]]},{"d":"2026-06-26","g":"H","t1":"Uruguay","t2":"Spain","r":[0,1],"p":[[0,2,5],[1,3,5],[1,2,5],[1,2,5],[2,2,0],[2,2,0],[1,1,0],[1,3,5],[1,1,0],[1,2,5],[1,2,5],[1,1,0]]},{"d":"2026-06-26","g":"H","t1":"Cape Verde","t2":"Saudi Arabia","r":[0,0],"p":[[0,0,10],[2,1,0],[1,2,0],[2,1,0],[1,1,5],[1,2,0],[1,1,5],[0,1,0],[1,2,0],[1,3,0],[2,0,0],[2,2,5]]},{"d":"2026-06-26","g":"G","t1":"New Zealand","t2":"Belgium","r":[1,5],"p":[[0,2,5],[1,3,5],[1,3,5],[0,2,5],[1,2,5],[2,2,0],[0,2,5],[1,3,5],[0,1,5],[1,2,5],[1,2,5],[0,3,5]]},{"d":"2026-06-26","g":"G","t1":"Egypt","t2":"Iran","r":[1,1],"p":[[2,1,0],[2,1,0],[2,2,5],[1,1,10],[3,1,0],[1,1,10],[1,1,10],[2,2,5],[2,0,0],[3,1,0],[0,1,0],[2,0,0]]},{"d":"2026-06-27","g":"L","t1":"Panama","t2":"England","r":[0,2],"p":[[0,4,5],[0,4,5],[0,3,5],[0,2,10],[1,4,5],[0,2,10],[0,3,5],[0,3,5],[0,2,10],[1,4,5],[0,3,5],[1,3,5]]},{"d":"2026-06-27","g":"L","t1":"Croatia","t2":"Ghana","r":[2,1],"p":[[2,1,10],[3,1,5],[2,1,10],[2,0,5],[2,1,10],[2,0,5],[1,1,0],[3,1,5],[1,0,5],[2,1,10],[2,0,5],[3,1,5]]},{"d":"2026-06-27","g":"K","t1":"Colombia","t2":"Portugal","r":[0,0],"p":[[1,2,0],[1,2,0],[1,1,5],[1,0,0],[2,2,5],[2,1,0],[2,2,5],[1,3,0],[1,2,0],[1,1,5],[1,1,5],[2,2,5]]},{"d":"2026-06-27","g":"K","t1":"DR Congo","t2":"Uzbekistan","r":[3,1],"p":[[2,1,5],[1,1,0],[2,2,0],[1,1,0],[1,1,0],[1,1,0],[1,1,0],[1,1,0],[1,0,5],[2,1,5],[2,1,5],[1,2,0]]},{"d":"2026-06-27","g":"J","t1":"Jordan","t2":"Argentina","r":[1,3],"p":[[0,3,5],[0,4,5],[0,2,5],[0,3,5],[0,2,5],[0,3,5],[0,3,5],[1,2,5],[0,3,5],[1,4,5],[1,3,10],[0,3,5]]},{"d":"2026-06-27","g":"J","t1":"Algeria","t2":"Austria","r":[3,3],"p":[[1,1,5],[1,1,5],[1,1,5],[1,2,0],[1,2,0],[1,2,0],[1,1,5],[2,2,5],[1,2,0],[1,1,5],[0,2,0],[1,1,5]]}];
 
 const MATCHES = [
   {id:1,date:'2026-06-28',team1:'Sudáfrica',team2:'Canadá',result:[0,1],
    predictions:[[0,2],[0,1],[1,2],[1,2],[0,2],[0,1],[1,2],[2,2],[0,1],[1,2],[1,2],[1,1]]},
-  {id:2,date:'2026-06-29',team1:'Alemania',team2:'Paraguay',result:[null,null],
+  {id:2,date:'2026-06-29',team1:'Alemania',team2:'Paraguay',result:[1,1],
    predictions:[[3,0],[3,0],[3,1],[2,0],[3,1],[2,1],[2,1],[3,1],[2,0],[3,1],[2,0],[3,0]]},
-  {id:3,date:'2026-06-29',team1:'Países Bajos',team2:'Marruecos',result:[null,null],
+  {id:3,date:'2026-06-29',team1:'Países Bajos',team2:'Marruecos',result:[1,1],
    predictions:[[2,2],[2,1],[2,1],[2,1],[3,2],[2,2],[2,1],[2,0],[1,2],[1,1],[2,1],[2,1]]},
-  {id:4,date:'2026-06-29',team1:'Brasil',team2:'Japón',result:[null,null],
+  {id:4,date:'2026-06-29',team1:'Brasil',team2:'Japón',result:[2,1],
    predictions:[[2,1],[2,1],[3,1],[1,1],[2,3],[2,1],[2,0],[2,0],[2,0],[2,1],[3,1],[3,1]]},
   {id:5,date:'2026-06-30',team1:'Francia',team2:'Suecia',result:[3,0],
    predictions:[[3,1],[3,0],[3,1],[3,1],[4,1],[2,0],[3,1],[2,1],[3,1],[3,1],[2,0],[3,0]]},
   {id:6,date:'2026-06-30',team1:'Costa de Marfil',team2:'Noruega',result:[1,2],
    predictions:[[1,3],[2,1],[1,3],[1,2],[1,3],[0,2],[2,1],[0,1],[1,2],[1,3],[1,2],[2,1]]},
-  {id:7,date:'2026-06-30',team1:'México',team2:'Ecuador',result:[null,null],
+  {id:7,date:'2026-06-30',team1:'México',team2:'Ecuador',result:[2,0],
    predictions:[[1,1],[1,1],[1,2],[2,1],[1,2],[1,1],[2,1],[2,2],[3,1],[2,0],[2,1],[1,2]]},
   {id:8,date:'2026-07-01',team1:'Inglaterra',team2:'R. del Congo',result:[2,1],
    predictions:[[3,0],[3,1],[4,1],[2,0],[3,0],[2,0],[3,0],[3,1],[2,0],[3,0],[3,0],[3,1]]},
@@ -394,17 +421,17 @@ const MATCHES = [
    predictions:[[3,1],[2,0],[3,1],[2,1],[3,0],[2,0],[2,0],[2,0],[2,0],[2,1],[2,0],[4,1]]},
   {id:10,date:'2026-07-01',team1:'Bélgica',team2:'Senegal',result:[2,2],
    predictions:[[2,2],[1,1],[3,1],[1,0],[2,1],[2,1],[2,1],[1,1],[1,0],[3,1],[2,1],[2,0]]},
-  {id:11,date:'2026-07-02',team1:'Portugal',team2:'Croacia',result:[null,null],
+  {id:11,date:'2026-07-02',team1:'Portugal',team2:'Croacia',result:[2,1],
    predictions:[[2,1],[2,1],[3,1],[2,1],[3,2],[1,1],[2,1],[1,2],[1,1],[2,1],[1,1],[2,1]]},
-  {id:12,date:'2026-07-02',team1:'España',team2:'Austria',result:[null,null],
+  {id:12,date:'2026-07-02',team1:'España',team2:'Austria',result:[3,0],
    predictions:[[3,1],[3,0],[4,1],[3,1],[4,1],[2,0],[2,0],[2,1],[2,0],[3,0],[2,1],[3,1]]},
-  {id:13,date:'2026-07-02',team1:'Suiza',team2:'Argelia',result:[null,null],
+  {id:13,date:'2026-07-02',team1:'Suiza',team2:'Argelia',result:[2,0],
    predictions:[[2,1],[2,0],[3,1],[1,0],[3,1],[2,0],[1,0],[2,1],[1,0],[2,1],[1,0],[3,1]]},
-  {id:14,date:'2026-07-03',team1:'Argentina',team2:'Cabo Verde',result:[null,null],
+  {id:14,date:'2026-07-03',team1:'Argentina',team2:'Cabo Verde',result:[2,2],
    predictions:[[3,0],[2,0],[3,1],[3,0],[3,0],[2,0],[3,0],[3,0],[3,1],[3,0],[4,0],[3,1]]},
-  {id:15,date:'2026-07-03',team1:'Colombia',team2:'Ghana',result:[null,null],
+  {id:15,date:'2026-07-03',team1:'Colombia',team2:'Ghana',result:[1,0],
    predictions:[[2,0],[2,0],[3,1],[2,1],[2,0],[2,0],[2,0],[2,0],[2,0],[1,0],[2,0],[2,0]]},
-  {id:16,date:'2026-07-03',team1:'Australia',team2:'Egipto',result:[null,null],
+  {id:16,date:'2026-07-03',team1:'Australia',team2:'Egipto',result:[1,1],
    predictions:[[1,1],[0,2],[2,2],[1,1],[1,3],[1,1],[2,1],[1,1],[0,1],[1,3],[1,2],[1,3]]},
 ];
 
@@ -540,7 +567,9 @@ function bonusPts(playerIdx) {
 }
 
 function matchPts(playerIdx) {
-  return MATCHES.reduce((s, m) => s + (calcMatchPoints(m.result, m.predictions[playerIdx]) ?? 0), 0);
+  const p16  = MATCHES.reduce((s, m) => s + (calcMatchPoints(m.result, m.predictions[playerIdx]) ?? 0), 0);
+  const pOct = MATCHES_OCT.reduce((s, m) => s + (calcMatchPoints(m.result, m.predictions[playerIdx]) ?? 0), 0);
+  return p16 + pOct;
 }
 
 function totalPts(playerIdx) {
@@ -672,14 +701,20 @@ function openPlayerDetail(playerIdx, rowEl) {
   const bp   = bonusPts(playerIdx);
   const tot  = p1 + mp + bp;
 
-  const played  = MATCHES.filter(m => m.result[0] !== null);
-  const pending = MATCHES.filter(m => m.result[0] === null);
-  const exactos2 = played.filter(m => calcMatchPoints(m.result, m.predictions[playerIdx]) === 10).length;
-  const results2 = played.filter(m => calcMatchPoints(m.result, m.predictions[playerIdx]) === 5).length;
+  const played16 = MATCHES.filter(m => m.result[0] !== null);
+  const playedOct = MATCHES_OCT.filter(m => m.result[0] !== null);
+  const pendingOct = MATCHES_OCT.filter(m => m.result[0] === null);
+  const pending16 = MATCHES.filter(m => m.result[0] === null);
+  const played  = [...played16, ...playedOct];
+  const pending = [...pending16, ...pendingOct];
+  const exactosOct = playedOct.filter(m => calcMatchPoints(m.result, m.predictions[playerIdx]) === 10).length;
+  const resultsOct = playedOct.filter(m => calcMatchPoints(m.result, m.predictions[playerIdx]) === 5).length;
+  const exactos16 = played16.filter(m => calcMatchPoints(m.result, m.predictions[playerIdx]) === 10).length;
+  const results16 = played16.filter(m => calcMatchPoints(m.result, m.predictions[playerIdx]) === 5).length;
   const exactos1 = PHASE1_MATCHES.filter(m => m.p[playerIdx][2] === 10).length;
   const results1 = PHASE1_MATCHES.filter(m => m.p[playerIdx][2] === 5).length;
-  const exactos  = exactos1 + exactos2;
-  const results  = results1 + results2;
+  const exactos  = exactos1 + exactos16 + exactosOct;
+  const results  = results1 + results16 + resultsOct;
 
   function matchRow(m) {
     const isPlayed = m.result[0] !== null;
@@ -739,23 +774,32 @@ function openPlayerDetail(playerIdx, rowEl) {
   }
 
   const pendingHTML = `
-    ${pending.length > 0 ? pending.map(matchRow).join('') : ''}
+    ${pendingOct.length > 0 ? pendingOct.map(matchRow).join('') : ''}
+    ${pending16.length > 0 ? pending16.map(matchRow).join('') : ''}
     ${bonusRow('goleador')}
     ${bonusRow('campeon')}`;
 
+  const octPts   = MATCHES_OCT.reduce((s,m) => s + (calcMatchPoints(m.result, m.predictions[playerIdx]) ?? 0), 0);
+  const pts16    = played16.reduce((s,m) => s + (calcMatchPoints(m.result, m.predictions[playerIdx]) ?? 0), 0);
   const phase1pts = PHASE1_MATCHES.reduce((s,m) => s + (m.p[playerIdx][2] || 0), 0);
-  const phase1SectionHeader = `<div style="font-size:0.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;padding:0.5rem 0.25rem 0.25rem;border-top:1px solid var(--border);margin-top:0.75rem">Primera Fase — ${PHASE1_MATCHES.length} partidos · ${phase1pts} pts</div>`;
-  const phase2SectionHeader = played.length > 0
-    ? `<div style="font-size:0.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;padding:0.5rem 0.25rem 0.25rem">Segunda Fase — ${played.length} partido${played.length!==1?'s':''} · ${mp} pts</div>`
+
+  const octSectionHeader = playedOct.length > 0
+    ? `<div style="font-size:0.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;padding:0.5rem 0.25rem 0.25rem">Octavos de Final — ${playedOct.length} partido${playedOct.length!==1?'s':''} · ${octPts} pts</div>`
     : '';
+  const phase16SectionHeader = played16.length > 0
+    ? `<div style="font-size:0.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;padding:0.5rem 0.25rem 0.25rem;border-top:1px solid var(--border);margin-top:0.5rem">16avos de Final — ${played16.length} partidos · ${pts16} pts</div>`
+    : '';
+  const phase1SectionHeader = `<div style="font-size:0.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;padding:0.5rem 0.25rem 0.25rem;border-top:1px solid var(--border);margin-top:0.5rem">Primera Fase — ${PHASE1_MATCHES.length} partidos · ${phase1pts} pts</div>`;
 
   const playedHTML = `
-    ${phase2SectionHeader}
-    ${played.length > 0 ? played.map(matchRow).join('') : ''}
+    ${octSectionHeader}
+    ${playedOct.length > 0 ? playedOct.map(matchRow).join('') : ''}
+    ${phase16SectionHeader}
+    ${played16.length > 0 ? played16.map(matchRow).join('') : ''}
     ${phase1SectionHeader}
     ${PHASE1_MATCHES.map(phase1Row).join('')}`;
 
-  const totalPlayed = played.length + PHASE1_MATCHES.length;
+  const totalPlayed = playedOct.length + played16.length + PHASE1_MATCHES.length;
 
   const detailHTML = `
     <div class="player-detail-inner">
@@ -763,7 +807,7 @@ function openPlayerDetail(playerIdx, rowEl) {
         <div>
           <div class="detail-name">${name}</div>
           <div class="detail-subtitle">
-            ${p1} (1ª fase) + ${mp} (2ª fase) + ${bp} (bonus) = <strong>${tot} total</strong>
+            ${phase1pts} (1ª) + ${pts16} (16avos) + ${octPts} (oct.) + ${bp} (bonus) = <strong>${tot} total</strong>
           </div>
         </div>
         <button class="detail-close" onclick="closePlayerDetail()">✕ Cerrar</button>
@@ -911,10 +955,10 @@ function flagImg(country, size) {
     : '';
 }
 
-function renderMatches() {
+function renderMatchList(matchArray, containerId) {
   const today = new Date().toLocaleDateString('en-CA', {timeZone:'America/Bogota'});
-  const sorted = [...MATCHES].sort((a, b) => matchSortKey(a).localeCompare(matchSortKey(b)));
-  document.getElementById('matches-container').innerHTML = sorted.map(m => {
+  const sorted = [...matchArray].sort((a, b) => matchSortKey(a).localeCompare(matchSortKey(b)));
+  document.getElementById(containerId).innerHTML = sorted.map(m => {
     const played      = m.result[0] !== null;
     const isLive      = m._live === true;
     const isToday     = m.date === today;
@@ -959,6 +1003,11 @@ function renderMatches() {
       </div>
     </div>`;
   }).join('');
+}
+
+function renderMatches() {
+  renderMatchList(MATCHES_OCT, 'matches-oct-container');
+  renderMatchList(MATCHES, 'matches-container');
 }
 
 // ── Goal leaders (ESPN API) ─────────────────────────────────────────────────
@@ -1197,11 +1246,12 @@ function renderBonus() {
 
 function renderProgress() {
   const played = MATCHES.filter(m => m.result[0] !== null).length;
-  const total  = MATCHES.length;
+  const total  = MATCHES.length + MATCHES_OCT.length;
+  const playedOctP = MATCHES_OCT.filter(m => m.result[0] !== null).length;
   document.getElementById('progress-label').textContent =
-    `⚽ ${played} de ${total} partidos jugados (16avos de final)`;
+    `⚽ ${played + playedOctP} de ${total} partidos jugados (16avos + Octavos)`;
   document.getElementById('progress-fill').style.width =
-    Math.round(played / total * 100) + '%';
+    Math.round((played + playedOctP) / total * 100) + '%';
 }
 
 function updateDate() {
@@ -1213,11 +1263,17 @@ function updateDate() {
 function toggleMatch(cardId) {
   document.getElementById(cardId).classList.toggle('open');
 }
+function toggleOctSection() {
+  const body = document.getElementById('matches-oct-body');
+  const chev = document.getElementById('matches-oct-chev');
+  body.classList.toggle('open');
+  chev.style.transform = body.classList.contains('open') ? 'rotate(180deg)' : '';
+}
 function toggleMatchesSection() {
   const body = document.getElementById('matches-section-body');
   const chev = document.getElementById('matches-chev');
-  body.classList.toggle('open');
-  chev.style.transform = body.classList.contains('open') ? 'rotate(180deg)' : '';
+  body.style.display = body.style.display === 'none' ? '' : 'none';
+  chev.style.transform = body.style.display === 'none' ? '' : 'rotate(180deg)';
 }
 function toggleBonus(collapseId) {
   const hdr  = document.getElementById(`${collapseId}-hdr`);
@@ -1374,7 +1430,7 @@ async function loadLiveScores(showFeedback = false) {
           }
         }
 
-        for (const m of MATCHES) {
+        for (const m of [...MATCHES, ...MATCHES_OCT]) {
           const t1n = normalize(m.team1), t2n = normalize(m.team2);
           const h = normalize(homeEs), aw = normalize(awayEs);
           let s1, s2;
