@@ -1241,10 +1241,11 @@ function renderProgress() {
   const played = MATCHES.filter(m => m.result[0] !== null).length;
   const total  = MATCHES.length + MATCHES_OCT.length;
   const playedOctP = MATCHES_OCT.filter(m => m.result[0] !== null).length;
+  const totalOct   = MATCHES_OCT.length;
   document.getElementById('progress-label').textContent =
-    `⚽ ${played + playedOctP} de ${total} partidos jugados (16avos + Octavos)`;
+    `⚽ ${playedOctP} de ${totalOct} partidos jugados (Octavos de Final)`;
   document.getElementById('progress-fill').style.width =
-    Math.round((played + playedOctP) / total * 100) + '%';
+    Math.round(playedOctP / totalOct * 100) + '%';
 }
 
 function updateDate() {
