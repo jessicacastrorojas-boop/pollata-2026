@@ -263,7 +263,7 @@
 <div class="header">
   <h1>⚽ Polla Mundialista 2026 — ATA</h1>
   <div class="subtitle">México · Estados Unidos · Canadá</div>
-  <div class="phase-badge">🏆 Octavos de Final</div>
+  <div class="phase-badge">🏆 Tercera Fase — Octavos de Final</div>
 </div>
 
 <!-- Share bar -->
@@ -338,7 +338,7 @@
 
   <!-- ═══ 3. MATCHES OCT ═══ -->
   <div class="section-title" id="matches-oct-hdr" onclick="toggleOctSection()" style="cursor:pointer;user-select:none">
-    ⚽ Partidos Octavos de Final
+    ⚽ Partidos Octavos de Final (3ª Fase)
     <span id="matches-oct-chev" style="font-size:0.7rem;color:var(--muted);font-weight:400;letter-spacing:0;text-transform:none;transition:transform 0.2s;display:inline-block">▼</span>
   </div>
   <div class="bonus-collapse-body" id="matches-oct-body">
@@ -777,7 +777,7 @@ function openPlayerDetail(playerIdx, rowEl) {
   const phase1pts = PHASE1_MATCHES.reduce((s,m) => s + (m.p[playerIdx][2] || 0), 0);
 
   const octSectionHeader = playedOct.length > 0
-    ? `<div style="font-size:0.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;padding:0.5rem 0.25rem 0.25rem">Octavos de Final — ${playedOct.length} partido${playedOct.length!==1?'s':''} · ${octPts} pts</div>`
+    ? `<div style="font-size:0.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;padding:0.5rem 0.25rem 0.25rem">Octavos (3ª Fase) — ${playedOct.length} partido${playedOct.length!==1?'s':''} · ${octPts} pts</div>`
     : '';
   const phase16SectionHeader = played16.length > 0
     ? `<div style="font-size:0.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;padding:0.5rem 0.25rem 0.25rem;border-top:1px solid var(--border);margin-top:0.5rem">16avos de Final — ${played16.length} partidos · ${pts16} pts</div>`
@@ -800,7 +800,7 @@ function openPlayerDetail(playerIdx, rowEl) {
         <div>
           <div class="detail-name">${name}</div>
           <div class="detail-subtitle">
-            ${phase1pts} (1ª) + ${pts16} (16avos) + ${octPts} (oct.) + ${bp} (bonus) = <strong>${tot} total</strong>
+            ${phase1pts} (1ª) + ${pts16} (16avos) + ${octPts} (octavos) + ${bp} (bonus) = <strong>${tot} total</strong>
           </div>
         </div>
         <button class="detail-close" onclick="closePlayerDetail()">✕ Cerrar</button>
