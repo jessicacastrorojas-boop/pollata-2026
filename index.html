@@ -363,6 +363,9 @@
 </footer>
 
 <script>
+// ══════════════════════════════════════════
+//  DATA
+// ══════════════════════════════════════════
 const PLAYERS = [
   'Kamilo Torres','Guillermo Castro','Victor Prieto','Martha Jauregui',
   'Ricardo Rojas','Jose Luis Chaparro','Nicolas Bedoya','Jeyber Chaparro',
@@ -371,6 +374,7 @@ const PLAYERS = [
 
 const PHASE1_PTS = [230, 185, 200, 210, 225, 175, 225, 170, 195, 215, 180, 195];
 
+// 56 partidos primera fase — formato: {d:fecha, g:grupo, t1:equipo1, t2:equipo2, r:[goles1,goles2], p:[[pred1,pred2,pts]×12]}
 const MATCHES_OCT = [
   {id:17,date:'2026-07-04',team1:'Canadá',team2:'Marruecos',result:[null,null],
    predictions:[[0,2],[0,2],[1,2],[0,2],[2,2],[0,2],[1,2],[1,1],[0,2],[1,2],[0,1],[1,2]]},
@@ -426,21 +430,25 @@ const MATCHES = [
    predictions:[[1,1],[0,2],[2,2],[1,1],[1,3],[1,1],[2,1],[1,1],[0,1],[1,3],[1,2],[1,3]]},
 ];
 
+// Bonus: result = nombre exacto del ganador (null = pendiente)
+// Comparación: normalizar a minúsculas para evitar errores de mayúsculas
 const BONUS = {
   goleador: {
     label: 'Goleador del Mundial', pts: 20,
     predictions: ['Haaland','Harry Kane','Mbappé','Kylian Mbappé','Harry Kane','Kylian Mbappé',
                   'Kylian Mbappé','Kylian Mbappé','Lucho Díaz','Kai Havertz','Harry Kane','Luis Suárez'],
-    result: null,
+    result: null,  // ← Actualizar con el nombre del goleador cuando se conozca
   },
   campeon: {
     label: 'Campeón del Mundial', pts: 40,
     predictions: ['Portugal','Francia','Francia','Francia','Inglaterra','Francia',
                   'Francia','España','Portugal','Francia','Inglaterra','Alemania'],
-    result: null,
+    result: null,  // ← Actualizar con el nombre del campeón cuando se conozca
   },
 };
 
+// Wikipedia article titles for each predicted goleador
+// Keys MUST be pre-normalized (no accents, lowercase) to match normalize() output
 const GOLEADOR_WIKI = {
   'haaland':        'Erling_Haaland',
   'erling haaland': 'Erling_Haaland',
@@ -450,7 +458,7 @@ const GOLEADOR_WIKI = {
   'lucho diaz':     'Luis_Díaz_(footballer,_born_1997)',
   'luis diaz':      'Luis_Díaz_(footballer,_born_1997)',
   'kai havertz':    'Kai_Havertz',
-  'luis suarez':    'Luis_Suárez',
+  'luis suarez':    'Luis_Suárez_(footballer,_born_1997)',
   'vinicius':       'Vinícius_Júnior',
   'vinicius junior':'Vinícius_Júnior',
   'lamine yamal':   'Lamine_Yamal',
@@ -460,24 +468,43 @@ const GOLEADOR_WIKI = {
   'jude bellingham':'Jude_Bellingham',
 };
 
+// flagcdn.com 2-letter country codes (ISO 3166-1 alpha-2)
+// Keys MUST be pre-normalized (no accents, lowercase) to match normalize() output
 const FLAG_CODES = {
-  'portugal':'pt','francia':'fr','france':'fr','inglaterra':'gb','england':'gb','reino unido':'gb',
-  'espana':'es','spain':'es','alemania':'de','germany':'de','argentina':'ar','brasil':'br',
-  'brazil':'br','colombia':'co','uruguay':'uy','italia':'it','italy':'it','paises bajos':'nl',
-  'holanda':'nl','netherlands':'nl','marruecos':'ma','ghana':'gh','senegal':'sn','egipto':'eg',
-  'egypt':'eg','croacia':'hr','croatia':'hr','belgica':'be','belgium':'be','suiza':'ch',
-  'switzerland':'ch','suecia':'se','sweden':'se','noruega':'no','norway':'no','mexico':'mx',
-  'estados unidos':'us','usa':'us','australia':'au','japon':'jp','japan':'jp','ecuador':'ec',
-  'paraguay':'py','austria':'at','dinamarca':'dk','denmark':'dk','cabo verde':'cv','sudafrica':'za',
-  'canada':'ca','costa de marfil':'ci','ivory coast':'ci','bosnia y herzegovina':'ba','bosnia':'ba',
-  'argelia':'dz','algeria':'dz','r. del congo':'cd','congo':'cg','rep. del congo':'cd','rd congo':'cd',
-  'korea':'kr','corea del sur':'kr','china':'cn','iran':'ir','irak':'iq','nigeria':'ng','camerun':'cm',
-  'tunez':'tn','rumania':'ro','hungria':'hu','escocia':'gb-sct','gales':'gb-wls','eslovaquia':'sk',
-  'eslovenia':'si','turquia':'tr','serbia':'rs','polonia':'pl','ucrania':'ua',
-  'iraq':'iq','jordan':'jo','morocco':'ma','south africa':'za','south korea':'kr','turkey':'tr',
-  'tunisia':'tn','scotland':'gb-sct','united states':'us','bosnia and herzegovina':'ba',
-  'cape verde':'cv','dr congo':'cd','curacao':'cw','czechia':'cz','haiti':'ht',
-  'new zealand':'nz','panama':'pa','qatar':'qa','saudi arabia':'sa','uzbekistan':'uz',
+  'portugal':           'pt', 'francia':         'fr', 'france':       'fr',
+  'inglaterra':         'gb', 'england':          'gb', 'reino unido':  'gb',
+  'espana':             'es', 'spain':            'es', 'alemania':     'de',
+  'germany':            'de', 'argentina':        'ar', 'brasil':       'br',
+  'brazil':             'br', 'colombia':         'co', 'uruguay':      'uy',
+  'italia':             'it', 'italy':            'it', 'paises bajos': 'nl',
+  'holanda':            'nl', 'netherlands':      'nl', 'marruecos':    'ma',
+  'ghana':              'gh', 'senegal':          'sn', 'egipto':       'eg',
+  'egypt':              'eg', 'croacia':          'hr', 'croatia':      'hr',
+  'belgica':            'be', 'belgium':          'be', 'suiza':        'ch',
+  'switzerland':        'ch', 'suecia':           'se', 'sweden':       'se',
+  'noruega':            'no', 'norway':           'no', 'mexico':       'mx',
+  'estados unidos':     'us', 'usa':              'us', 'australia':    'au',
+  'japon':              'jp', 'japan':            'jp', 'ecuador':      'ec',
+  'paraguay':           'py', 'austria':          'at', 'dinamarca':    'dk',
+  'denmark':            'dk', 'cabo verde':       'cv', 'sudafrica':    'za',
+  'canada':             'ca', 'costa de marfil':  'ci', 'ivory coast':  'ci',
+  'bosnia y herzegovina':'ba', 'bosnia':          'ba', 'argelia':      'dz',
+  'algeria':            'dz', 'r. del congo':     'cd', 'congo':        'cg',
+  'rep. del congo':     'cd', 'rd congo':         'cd', 'korea':        'kr',
+  'corea del sur':      'kr', 'china':            'cn', 'iran':         'ir',
+  'irak':               'iq', 'nigeria':          'ng', 'camerun':      'cm',
+  'tunez':              'tn', 'marruecos':        'ma', 'rumania':      'ro',
+  'hungria':            'hu', 'escocia':          'gb-sct', 'gales':    'gb-wls',
+  'eslovaquia':         'sk', 'eslovenia':        'si', 'turquia':      'tr',
+  'serbia':             'rs', 'polonia':          'pl', 'ucrania':      'ua',
+  // English names used in PHASE1_MATCHES
+  'iraq':                'iq', 'jordan':           'jo', 'morocco':          'ma',
+  'south africa':        'za', 'south korea':      'kr', 'turkey':           'tr',
+  'tunisia':             'tn', 'scotland':         'gb-sct', 'united states': 'us',
+  'bosnia and herzegovina':'ba','cape verde':       'cv', 'dr congo':         'cd',
+  'curacao':             'cw', 'czechia':          'cz', 'haiti':            'ht',
+  'new zealand':         'nz', 'panama':           'pa', 'qatar':            'qa',
+  'saudi arabia':        'sa', 'uzbekistan':       'uz',
 };
 
 function getFlagUrl(country) {
@@ -485,9 +512,12 @@ function getFlagUrl(country) {
   return code ? `https://flagcdn.com/w80/${code}.png` : null;
 }
 
+// Async: fetch Wikipedia thumbnail for a player photo img element
 async function loadWikiPhoto(wikiTitle, imgEl) {
   try {
-    const res = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(wikiTitle)}`);
+    const res = await fetch(
+      `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(wikiTitle)}`
+    );
     if (!res.ok) return;
     const data = await res.json();
     const src = data?.thumbnail?.source;
@@ -497,13 +527,18 @@ async function loadWikiPhoto(wikiTitle, imgEl) {
 
 function loadAllPlayerPhotos() {
   document.querySelectorAll('img[data-wiki]').forEach(img => {
-    img.style.opacity = '0'; img.style.transition = 'opacity 0.4s';
+    img.style.opacity = '0';
+    img.style.transition = 'opacity 0.4s';
     loadWikiPhoto(img.dataset.wiki, img);
   });
 }
 
+// ══════════════════════════════════════════
+//  SCORING
+// ══════════════════════════════════════════
 function calcMatchPoints(result, pred) {
-  const [r1, r2] = result; const [p1, p2] = pred;
+  const [r1, r2] = result;
+  const [p1, p2] = pred;
   if (r1 === null) return null;
   if (p1 === r1 && p2 === r2) return 10;
   const rWin = r1 > r2 ? 1 : r1 < r2 ? -1 : 0;
@@ -511,20 +546,24 @@ function calcMatchPoints(result, pred) {
   return rWin === pWin ? 5 : 0;
 }
 
-function normalize(s) { return s ? s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim() : ''; }
+function normalize(s) { return s ? s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim() : ''; }
 
 function bonusPts(playerIdx) {
   let total = 0;
-  for (const key of ['goleador','campeon']) {
+  for (const key of ['goleador', 'campeon']) {
     const b = BONUS[key];
-    if (b.result !== null && normalize(b.predictions[playerIdx]) === normalize(b.result)) total += b.pts;
+    if (b.result !== null) {
+      if (normalize(b.predictions[playerIdx]) === normalize(b.result)) {
+        total += b.pts;
+      }
+    }
   }
   return total;
 }
 
 function matchPts(playerIdx) {
-  const p16  = MATCHES.reduce((s,m) => s + (calcMatchPoints(m.result, m.predictions[playerIdx]) ?? 0), 0);
-  const pOct = MATCHES_OCT.reduce((s,m) => s + (calcMatchPoints(m.result, m.predictions[playerIdx]) ?? 0), 0);
+  const p16  = MATCHES.reduce((s, m) => s + (calcMatchPoints(m.result, m.predictions[playerIdx]) ?? 0), 0);
+  const pOct = MATCHES_OCT.reduce((s, m) => s + (calcMatchPoints(m.result, m.predictions[playerIdx]) ?? 0), 0);
   return p16 + pOct;
 }
 
@@ -532,88 +571,149 @@ function totalPts(playerIdx) {
   return PHASE1_PTS[playerIdx] + matchPts(playerIdx) + bonusPts(playerIdx);
 }
 
-const PRIZE_PCTS = [0.50, 0.30, 0.20];
+// ══════════════════════════════════════════
+//  PRIZE DISTRIBUTION WITH TIES
+// ══════════════════════════════════════════
+const PRIZE_PCTS = [0.50, 0.30, 0.20]; // 1st, 2nd, 3rd
 
 function computePrizes() {
-  const sorted = PLAYERS.map((name,i) => ({name,i,pts:totalPts(i)})).sort((a,b) => b.pts - a.pts);
-  const positions = []; let prizeSlot = 0, i = 0;
+  const sorted = PLAYERS
+    .map((name, i) => ({ name, i, pts: totalPts(i) }))
+    .sort((a, b) => b.pts - a.pts);
+
+  // Each prize slot (1°, 2°, 3°) keeps its fixed % regardless of ties.
+  // Tied players in a slot share ONLY that slot's prize.
+  // The next distinct group still fills the next prize slot.
+  const positions = [];
+  let prizeSlot = 0;
+  let i = 0;
+
   while (prizeSlot < 3 && i < sorted.length) {
-    const pts = sorted[i].pts; const tied = [];
+    const pts = sorted[i].pts;
+    const tied = [];
     let j = i;
-    while (j < sorted.length && sorted[j].pts === pts) { tied.push(sorted[j]); j++; }
-    const pct = PRIZE_PCTS[prizeSlot]; const pctEach = pct / tied.length;
-    positions.push({pct, pctEach, players: tied, pts, prizeIdx: prizeSlot});
-    prizeSlot++; i = j;
+    while (j < sorted.length && sorted[j].pts === pts) {
+      tied.push(sorted[j]);
+      j++;
+    }
+    const pct     = PRIZE_PCTS[prizeSlot];
+    const pctEach = pct / tied.length;
+    positions.push({ pct, pctEach, players: tied, pts, prizeIdx: prizeSlot });
+    prizeSlot++;  // next prize slot (never skipped by tie group size)
+    i = j;        // advance past this tied group
   }
+
   return positions;
 }
 
+// ══════════════════════════════════════════
+//  RENDER PRIZES
+// ══════════════════════════════════════════
 function renderPrizes() {
-  const pot = 840000; const positions = computePrizes();
-  const medals = ['🥇','🥈','🥉']; const posClasses = ['pos-1','pos-2','pos-3'];
-  const labels = ['1er puesto','2do puesto','3er puesto'];
+  const pot = 840000;
+  const positions = computePrizes();
+  const medals = ['🥇', '🥈', '🥉'];
+  const posClasses = ['pos-1', 'pos-2', 'pos-3'];
+  const labels = ['1er puesto', '2do puesto', '3er puesto'];
+
   const podium = document.getElementById('prize-podium');
   const note   = document.getElementById('prize-note');
+
   const cards = positions.map((pos, rank) => {
-    const isTied = pos.players.length > 1;
-    const slotPct = (pos.pct*100).toFixed(0); const slotAmount = pot * pos.pct;
-    const eachPct = (pos.pctEach*100).toFixed(1); const eachAmount = pot * pos.pctEach;
-    const fmtSlot = '$' + slotAmount.toLocaleString('es-CO');
-    const fmtEach = '$' + eachAmount.toLocaleString('es-CO');
-    const names = pos.players.map(p => p.name).join('<br>');
+    const isTied       = pos.players.length > 1;
+    const slotPct      = (pos.pct * 100).toFixed(0);               // e.g. 30
+    const slotAmount   = pot * pos.pct;                             // e.g. 252000
+    const eachPct      = (pos.pctEach * 100).toFixed(1);           // e.g. 15.0
+    const eachAmount   = pot * pos.pctEach;                         // e.g. 126000
+    const fmtSlot      = '$' + slotAmount.toLocaleString('es-CO');
+    const fmtEach      = '$' + eachAmount.toLocaleString('es-CO');
+    const names        = pos.players.map(p => p.name).join('<br>');
+
     const prizeBlock = isTied ? `
-      <div class="pc-prize-slot"><span class="pc-prize-label">Premio del puesto</span><span class="pc-prize-total">${slotPct}% = ${fmtSlot}</span></div>
-      <div class="pc-prize-split"><span class="pc-prize-divider">÷ ${pos.players.length} empatados</span><span class="pc-prize-each">${eachPct}% = ${fmtEach} c/u</span></div>` :
-      `<div class="pc-prize-slot"><span class="pc-prize-label">Premio</span><span class="pc-prize-total">${slotPct}% = ${fmtSlot}</span></div>`;
-    return `<div class="prize-card ${posClasses[rank] || ''}">
-      <div class="pc-medal">${medals[rank] || '🏅'}</div>
-      <div class="pc-label">${labels[rank] || ''}</div>
-      ${prizeBlock}
-      <div class="pc-players">${names}</div>
-      <div class="pc-pts">${pos.pts} pts</div>
-    </div>`;
+      <div class="pc-prize-slot">
+        <span class="pc-prize-label">Premio del puesto</span>
+        <span class="pc-prize-total">${slotPct}% = ${fmtSlot}</span>
+      </div>
+      <div class="pc-prize-split">
+        <span class="pc-prize-divider">÷ ${pos.players.length} empatados</span>
+        <span class="pc-prize-each">${eachPct}% = ${fmtEach} c/u</span>
+      </div>` : `
+      <div class="pc-prize-slot">
+        <span class="pc-prize-label">Premio</span>
+        <span class="pc-prize-total">${slotPct}% = ${fmtSlot}</span>
+      </div>`;
+
+    return `
+      <div class="prize-card ${posClasses[rank] || ''}">
+        <div class="pc-medal">${medals[rank] || '🏅'}</div>
+        <div class="pc-label">${labels[rank] || ''}</div>
+        ${prizeBlock}
+        <div class="pc-players">${names}</div>
+        <div class="pc-pts">${pos.pts} pts</div>
+      </div>`;
   });
+
+  // Fill empty slots if fewer than 3 positions
   while (cards.length < 3) {
     const i = cards.length;
-    cards.push(`<div class="prize-card ${posClasses[i]}">
-      <div class="pc-medal">${medals[i]}</div><div class="pc-label">${labels[i]}</div>
-      <div class="pc-prize-slot"><span class="pc-prize-label">Premio</span>
-      <span class="pc-prize-total" style="color:var(--muted)">${(PRIZE_PCTS[i]*100).toFixed(0)}% = $${(pot*PRIZE_PCTS[i]).toLocaleString('es-CO')}</span></div>
-      <div class="pc-players" style="color:var(--muted)">—</div></div>`);
+    const slotPct    = (PRIZE_PCTS[i] * 100).toFixed(0);
+    const slotAmount = '$' + (pot * PRIZE_PCTS[i]).toLocaleString('es-CO');
+    cards.push(`
+      <div class="prize-card ${posClasses[i]}">
+        <div class="pc-medal">${medals[i]}</div>
+        <div class="pc-label">${labels[i]}</div>
+        <div class="pc-prize-slot">
+          <span class="pc-prize-label">Premio</span>
+          <span class="pc-prize-total" style="color:var(--muted)">${slotPct}% = ${slotAmount}</span>
+        </div>
+        <div class="pc-players" style="color:var(--muted)">—</div>
+      </div>`);
   }
+
   podium.innerHTML = cards.join('');
+
+  // Note
   const hasTies = positions.some(p => p.players.length > 1);
   note.textContent = hasTies
     ? 'Empate: el valor del puesto se divide en partes iguales entre los empatados. El siguiente puesto conserva su premio completo.'
     : '1er puesto 50% · 2do puesto 30% · 3er puesto 20% del premio total.';
 }
 
+// ══════════════════════════════════════════
+//  PLAYER DETAIL DRAWER
+// ══════════════════════════════════════════
 let openPlayerIdx = null;
 
 function openPlayerDetail(playerIdx, rowEl) {
   try {
   closePlayerDetail();
   openPlayerIdx = playerIdx;
+
   const today = new Date().toLocaleDateString('en-CA', {timeZone:'America/Bogota'});
   const name = PLAYERS[playerIdx];
-  const p1 = PHASE1_PTS[playerIdx]; const mp = matchPts(playerIdx);
-  const bp = bonusPts(playerIdx); const tot = p1 + mp + bp;
+  const p1   = PHASE1_PTS[playerIdx];
+  const mp   = matchPts(playerIdx);
+  const bp   = bonusPts(playerIdx);
+  const tot  = p1 + mp + bp;
+
   const played16 = MATCHES.filter(m => m.result[0] !== null);
   const playedOct = MATCHES_OCT.filter(m => m.result[0] !== null);
   const pendingOct = MATCHES_OCT.filter(m => m.result[0] === null);
   const pending16 = MATCHES.filter(m => m.result[0] === null);
-  const played = [...played16, ...playedOct]; const pending = [...pending16, ...pendingOct];
+  const played  = [...played16, ...playedOct];
+  const pending = [...pending16, ...pendingOct];
   const exactosOct = playedOct.filter(m => calcMatchPoints(m.result, m.predictions[playerIdx]) === 10).length;
   const resultsOct = playedOct.filter(m => calcMatchPoints(m.result, m.predictions[playerIdx]) === 5).length;
   const exactos16 = played16.filter(m => calcMatchPoints(m.result, m.predictions[playerIdx]) === 10).length;
   const results16 = played16.filter(m => calcMatchPoints(m.result, m.predictions[playerIdx]) === 5).length;
   const exactos1 = PHASE1_MATCHES.filter(m => m.p[playerIdx][2] === 10).length;
   const results1 = PHASE1_MATCHES.filter(m => m.p[playerIdx][2] === 5).length;
-  const exactos = exactos1 + exactos16 + exactosOct;
-  const results = results1 + results16 + resultsOct;
+  const exactos  = exactos1 + exactos16 + exactosOct;
+  const results  = results1 + results16 + resultsOct;
 
   function matchRow(m) {
-    const isPlayed = m.result[0] !== null; const isToday = m.date === today;
+    const isPlayed = m.result[0] !== null;
+    const isToday  = m.date === today;
     const pts = calcMatchPoints(m.result, m.predictions[playerIdx]);
     const pred = m.predictions[playerIdx];
     const ptsCls = pts === null ? 'pts-p' : pts === 10 ? 'pts-10' : pts === 5 ? 'pts-5' : 'pts-0';
@@ -621,89 +721,133 @@ function openPlayerDetail(playerIdx, rowEl) {
     const resultInfo = isPlayed
       ? `<span class="dm-result">Resultado: ${m.result[0]}–${m.result[1]}</span>`
       : `<span class="dm-result">${isToday ? '🔴 Hoy' : formatDateTime(m.id)}</span>`;
-    return `<div class="detail-match ${cardCls}">
-      <div><div class="dm-teams">${flagImg(m.team1,16)} ${m.team1} vs ${m.team2} ${flagImg(m.team2,16)}</div>${resultInfo}</div>
-      <div style="display:flex;align-items:center;gap:0.6rem">
-        <span class="dm-pred">${pred[0]}–${pred[1]}</span>
-        <span class="dm-pts ${ptsCls}">${pts === null ? '?' : pts + ' pts'}</span>
-      </div></div>`;
+    return `
+      <div class="detail-match ${cardCls}">
+        <div><div class="dm-teams">${flagImg(m.team1,16)} ${m.team1} vs ${m.team2} ${flagImg(m.team2,16)}</div>${resultInfo}</div>
+        <div style="display:flex;align-items:center;gap:0.6rem">
+          <span class="dm-pred">${pred[0]}–${pred[1]}</span>
+          <span class="dm-pts ${ptsCls}">${pts === null ? '?' : pts + ' pts'}</span>
+        </div>
+      </div>`;
   }
 
   function phase1Row(m) {
-    const pred = m.p[playerIdx]; const pts = pred[2];
+    const pred = m.p[playerIdx];
+    const pts  = pred[2];
     const ptsCls = pts === 10 ? 'pts-10' : pts === 5 ? 'pts-5' : 'pts-0';
-    return `<div class="detail-match match-played">
-      <div>
-        <div class="dm-teams">${flagImg(m.t1,16)} ${m.t1} vs ${m.t2} ${flagImg(m.t2,16)}</div>
-        <span class="dm-result">Resultado: ${m.r[0]}–${m.r[1]} · Grupo ${m.g} · ${m.d}</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:0.6rem">
-        <span class="dm-pred">${pred[0]}–${pred[1]}</span>
-        <span class="dm-pts ${ptsCls}">${pts} pts</span>
-      </div></div>`;
+    return `
+      <div class="detail-match match-played">
+        <div>
+          <div class="dm-teams">${flagImg(m.t1,16)} ${m.t1} vs ${m.t2} ${flagImg(m.t2,16)}</div>
+          <span class="dm-result">Resultado: ${m.r[0]}–${m.r[1]} · Grupo ${m.g} · ${m.d}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:0.6rem">
+          <span class="dm-pred">${pred[0]}–${pred[1]}</span>
+          <span class="dm-pts ${ptsCls}">${pts} pts</span>
+        </div>
+      </div>`;
   }
 
   function bonusRow(key) {
-    const b = BONUS[key]; const pred = b.predictions[playerIdx];
+    const b = BONUS[key];
+    const pred = b.predictions[playerIdx];
     const scored = b.result !== null && normalize(pred) === normalize(b.result);
     const ptsCls = b.result === null ? 'pts-p' : scored ? (b.pts === 20 ? 'pts-20' : 'pts-40') : 'pts-0';
     const ptsLabel = b.result === null ? '?' : scored ? `+${b.pts} pts` : '0 pts';
     const cardCls = b.result !== null ? 'match-played' : 'match-pending';
-    return `<div class="detail-match ${cardCls}">
-      <div>
-        <div class="dm-teams">${b.label} <span style="background:#4c1d95;color:#e9d5ff;font-size:0.65rem;font-weight:700;padding:0.1rem 0.35rem;border-radius:4px;margin-left:0.3rem">${b.pts} pts</span></div>
-        ${b.result ? `<span class="dm-result">Resultado: ${b.result}</span>` : '<span class="dm-result">Pendiente (fin del torneo)</span>'}
-      </div>
-      <div style="display:flex;align-items:center;gap:0.6rem">
-        <span class="dm-pred" style="font-size:0.85rem">${pred}</span>
-        <span class="dm-pts ${ptsCls}">${ptsLabel}</span>
-      </div></div>`;
+    return `
+      <div class="detail-match ${cardCls}">
+        <div>
+          <div class="dm-teams">${b.label} <span style="background:#4c1d95;color:#e9d5ff;font-size:0.65rem;font-weight:700;padding:0.1rem 0.35rem;border-radius:4px;margin-left:0.3rem">${b.pts} pts</span></div>
+          ${b.result ? `<span class="dm-result">Resultado: ${b.result}</span>` : '<span class="dm-result">Pendiente (fin del torneo)</span>'}
+        </div>
+        <div style="display:flex;align-items:center;gap:0.6rem">
+          <span class="dm-pred" style="font-size:0.85rem">${pred}</span>
+          <span class="dm-pts ${ptsCls}">${ptsLabel}</span>
+        </div>
+      </div>`;
   }
 
-  const pendingHTML = `${pendingOct.map(matchRow).join('')}${pending16.map(matchRow).join('')}${bonusRow('goleador')}${bonusRow('campeon')}`;
-  const octPts = MATCHES_OCT.reduce((s,m) => s + (calcMatchPoints(m.result, m.predictions[playerIdx]) ?? 0), 0);
-  const pts16 = played16.reduce((s,m) => s + (calcMatchPoints(m.result, m.predictions[playerIdx]) ?? 0), 0);
+  const pendingHTML = `
+    ${pendingOct.length > 0 ? pendingOct.map(matchRow).join('') : ''}
+    ${pending16.length > 0 ? pending16.map(matchRow).join('') : ''}
+    ${bonusRow('goleador')}
+    ${bonusRow('campeon')}`;
+
+  const octPts   = MATCHES_OCT.reduce((s,m) => s + (calcMatchPoints(m.result, m.predictions[playerIdx]) ?? 0), 0);
+  const pts16    = played16.reduce((s,m) => s + (calcMatchPoints(m.result, m.predictions[playerIdx]) ?? 0), 0);
   const phase1pts = PHASE1_MATCHES.reduce((s,m) => s + (m.p[playerIdx][2] || 0), 0);
-  const octHdr = playedOct.length > 0
-    ? `<div style="font-size:0.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;padding:0.5rem 0.25rem 0.25rem">Octavos (3ª Fase) — ${playedOct.length} partido${playedOct.length!==1?'s':''} · ${octPts} pts</div>` : '';
-  const hdr16 = played16.length > 0
-    ? `<div style="font-size:0.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;padding:0.5rem 0.25rem 0.25rem;border-top:1px solid var(--border);margin-top:0.5rem">16avos de Final — ${played16.length} partidos · ${pts16} pts</div>` : '';
-  const hdr1 = `<div style="font-size:0.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;padding:0.5rem 0.25rem 0.25rem;border-top:1px solid var(--border);margin-top:0.5rem">Fase de Grupos — ${PHASE1_MATCHES.length} partidos · ${phase1pts} pts</div>`;
-  const playedHTML = `${octHdr}${playedOct.map(matchRow).join('')}${hdr16}${played16.map(matchRow).join('')}${hdr1}${PHASE1_MATCHES.map(phase1Row).join('')}`;
+
+  const octSectionHeader = playedOct.length > 0
+    ? `<div style="font-size:0.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;padding:0.5rem 0.25rem 0.25rem">Octavos (3ª Fase) — ${playedOct.length} partido${playedOct.length!==1?'s':''} · ${octPts} pts</div>`
+    : '';
+  const phase16SectionHeader = played16.length > 0
+    ? `<div style="font-size:0.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;padding:0.5rem 0.25rem 0.25rem;border-top:1px solid var(--border);margin-top:0.5rem">16avos de Final — ${played16.length} partidos · ${pts16} pts</div>`
+    : '';
+  const phase1SectionHeader = `<div style="font-size:0.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;padding:0.5rem 0.25rem 0.25rem;border-top:1px solid var(--border);margin-top:0.5rem">Fase de Grupos — ${PHASE1_MATCHES.length} partidos · ${phase1pts} pts</div>`;
+
+  const playedHTML = `
+    ${octSectionHeader}
+    ${playedOct.length > 0 ? playedOct.map(matchRow).join('') : ''}
+    ${phase16SectionHeader}
+    ${played16.length > 0 ? played16.map(matchRow).join('') : ''}
+    ${phase1SectionHeader}
+    ${PHASE1_MATCHES.map(phase1Row).join('')}`;
+
   const totalPlayed = playedOct.length + played16.length + PHASE1_MATCHES.length;
-  const detailHTML = `<div class="player-detail-inner">
-    <div class="detail-header">
-      <div><div class="detail-name">${name}</div>
-      <div class="detail-subtitle">${phase1pts} (grupos) + ${pts16} (16avos) + ${octPts} (octavos) + ${bp} (bonus) = <strong>${tot} total</strong></div></div>
-      <button class="detail-close" onclick="closePlayerDetail()">✕ Cerrar</button>
-    </div>
-    <div class="detail-tabs">
-      <button class="detail-tab active" id="tab-pending-${playerIdx}" onclick="switchTab(${playerIdx},'pending')">Pendientes + Bonus (${pending.length + 2})</button>
-      <button class="detail-tab" id="tab-played-${playerIdx}" onclick="switchTab(${playerIdx},'played')">Jugados (${totalPlayed})</button>
-    </div>
-    <div id="tab-content-pending-${playerIdx}" class="detail-match-list">${pendingHTML}</div>
-    <div id="tab-content-played-${playerIdx}" class="detail-match-list" style="display:none">${playedHTML}</div>
-    <div class="detail-summary">
-      <span>Exactos: <strong>${exactos}</strong></span>
-      <span>Solo resultado: <strong>${results}</strong></span>
-      <span>Pts 2ª fase: <strong style="color:var(--accent2)">+${mp}</strong></span>
-      <span>Pts bonus: <strong style="color:#c084fc">+${bp}</strong></span>
-      <span>Total: <strong style="color:var(--accent)">${tot}</strong></span>
-    </div></div>`;
+
+  const detailHTML = `
+    <div class="player-detail-inner">
+      <div class="detail-header">
+        <div>
+          <div class="detail-name">${name}</div>
+          <div class="detail-subtitle">
+            ${phase1pts} (grupos) + ${pts16} (16avos) + ${octPts} (octavos) + ${bp} (bonus) = <strong>${tot} total</strong>
+          </div>
+        </div>
+        <button class="detail-close" onclick="closePlayerDetail()">✕ Cerrar</button>
+      </div>
+      <div class="detail-tabs">
+        <button class="detail-tab active" id="tab-pending-${playerIdx}" onclick="switchTab(${playerIdx},'pending')">
+          Pendientes + Bonus (${pending.length + 2})
+        </button>
+        <button class="detail-tab" id="tab-played-${playerIdx}" onclick="switchTab(${playerIdx},'played')">
+          Jugados (${totalPlayed})
+        </button>
+      </div>
+      <div id="tab-content-pending-${playerIdx}" class="detail-match-list">${pendingHTML}</div>
+      <div id="tab-content-played-${playerIdx}" class="detail-match-list" style="display:none">${playedHTML}</div>
+      <div class="detail-summary">
+        <span>Exactos: <strong>${exactos}</strong></span>
+        <span>Solo resultado: <strong>${results}</strong></span>
+        <span>Pts 2ª fase: <strong style="color:var(--accent2)">+${mp}</strong></span>
+        <span>Pts bonus: <strong style="color:#c084fc">+${bp}</strong></span>
+        <span>Total: <strong style="color:var(--accent)">${tot}</strong></span>
+      </div>
+    </div>`;
+
   const newRow = document.createElement('tr');
-  newRow.className = 'player-detail-row'; newRow.id = `detail-row-${playerIdx}`;
-  const td = document.createElement('td'); td.colSpan = 7;
-  td.innerHTML = detailHTML; newRow.appendChild(td);
+  newRow.className = 'player-detail-row';
+  newRow.id = `detail-row-${playerIdx}`;
+  const td = document.createElement('td');
+  td.colSpan = 7;
+  td.innerHTML = detailHTML;
+  newRow.appendChild(td);
   rowEl.parentNode.insertBefore(newRow, rowEl.nextSibling);
   rowEl.querySelector('.chevron').textContent = '▲';
   } catch(e) {
-    console.error('openPlayerDetail error:', e); openPlayerIdx = null;
-    const errRow = document.createElement('tr'); errRow.id = `detail-row-${playerIdx}`;
+    console.error('openPlayerDetail error:', e);
+    openPlayerIdx = null;
+    // Show error inline instead of alert
+    const errRow = document.createElement('tr');
+    errRow.id = `detail-row-${playerIdx}`;
     errRow.className = 'player-detail-row';
-    const errTd = document.createElement('td'); errTd.colSpan = 7;
+    const errTd = document.createElement('td');
+    errTd.colSpan = 7;
     errTd.style.cssText = 'padding:1rem;color:#f87171;background:#1e1e2e;font-size:0.85rem';
     errTd.textContent = '⚠️ Error al cargar panel: ' + e.message;
-    errRow.appendChild(errTd); rowEl.parentNode.insertBefore(errRow, rowEl.nextSibling);
+    errRow.appendChild(errTd);
+    rowEl.parentNode.insertBefore(errRow, rowEl.nextSibling);
   }
 }
 
@@ -718,7 +862,7 @@ function closePlayerDetail() {
 function switchTab(playerIdx, tab) {
   ['pending','played'].forEach(t => {
     const content = document.getElementById(`tab-content-${t}-${playerIdx}`);
-    const btn = document.getElementById(`tab-${t}-${playerIdx}`);
+    const btn     = document.getElementById(`tab-${t}-${playerIdx}`);
     if (content) { content.style.display = t === tab ? 'flex' : 'none'; content.style.flexDirection = 'column'; }
     if (btn) btn.classList.toggle('active', t === tab);
   });
@@ -728,29 +872,50 @@ function handlePlayerClick(playerIdx, rowEl) {
   openPlayerIdx === playerIdx ? closePlayerDetail() : openPlayerDetail(playerIdx, rowEl);
 }
 
+// ══════════════════════════════════════════
+//  RENDER
+// ══════════════════════════════════════════
+// Horarios en hora Colombia (UTC-5) por id de partido
 const MATCH_TIMES_COL = {
-  1: '2026-06-28T14:00',  4: '2026-06-29T12:00',  2: '2026-06-29T15:30',
-  3: '2026-06-29T20:00',  6: '2026-06-30T12:00',  5: '2026-06-30T16:00',
-  7: '2026-06-30T20:00',  8: '2026-07-01T11:00', 10: '2026-07-01T15:00',
-  9: '2026-07-01T19:00', 12: '2026-07-02T14:00', 11: '2026-07-02T18:00',
- 13: '2026-07-02T22:00', 16: '2026-07-03T13:00', 14: '2026-07-03T17:00',
- 15: '2026-07-03T20:30',
- 17: '2026-07-04T12:00', 18: '2026-07-04T16:00',
- 19: '2026-07-05T15:00', 20: '2026-07-05T19:00',
- 21: '2026-07-06T14:00', 22: '2026-07-06T19:00',
- 23: '2026-07-07T11:00', 24: '2026-07-07T15:00',
+  1: '2026-06-28T14:00',   // Sudáfrica vs Canadá
+  4: '2026-06-29T12:00',   // Brasil vs Japón
+  2: '2026-06-29T15:30',   // Alemania vs Paraguay
+  3: '2026-06-29T20:00',   // Países Bajos vs Marruecos
+  6: '2026-06-30T12:00',   // Costa de Marfil vs Noruega
+  5: '2026-06-30T16:00',   // Francia vs Suecia
+  7: '2026-06-30T20:00',   // México vs Ecuador
+  8: '2026-07-01T11:00',   // Inglaterra vs R. del Congo
+  10:'2026-07-01T15:00',   // Bélgica vs Senegal
+  9: '2026-07-01T19:00',   // Estados Unidos vs Bosnia y Herzegovina
+  12:'2026-07-02T14:00',   // España vs Austria
+  11:'2026-07-02T18:00',   // Portugal vs Croacia
+  13:'2026-07-02T22:00',   // Suiza vs Argelia
+  16:'2026-07-03T13:00',   // Australia vs Egipto
+  14:'2026-07-03T17:00',   // Argentina vs Cabo Verde
+  15:'2026-07-03T20:30',   // Colombia vs Ghana
+  // ── Octavos de Final (3ª Fase) ──
+  17:'2026-07-04T12:00',   // Canadá vs Marruecos
+  18:'2026-07-04T16:00',   // Paraguay vs Francia
+  19:'2026-07-05T15:00',   // Brasil vs Noruega
+  20:'2026-07-05T19:00',   // México vs Inglaterra
+  21:'2026-07-06T14:00',   // Portugal vs España
+  22:'2026-07-06T19:00',   // Estados Unidos vs Bélgica
+  23:'2026-07-07T11:00',   // Argentina vs Egipto
+  24:'2026-07-07T15:00',   // Suiza vs Colombia
 };
 
 function formatDateTime(matchId) {
   const iso = MATCH_TIMES_COL[matchId];
   if (!iso) return '';
+  // Parse directly from string to avoid browser timezone shifts
   const [datePart, timePart] = iso.split('T');
   const [yr, mo, dy] = datePart.split('-').map(Number);
-  const [hh, mm] = timePart.split(':').map(Number);
+  const [hh, mm]     = timePart.split(':').map(Number);
   const DIAS  = ['dom','lun','mar','mié','jue','vie','sáb'];
   const MESES = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
-  const dow = new Date(yr, mo-1, dy).getDay();
-  const h12 = hh === 0 ? 12 : hh > 12 ? hh-12 : hh;
+  // Compute weekday for Colombia date (no timezone offset)
+  const dow = new Date(yr, mo - 1, dy).getDay();
+  const h12 = hh === 0 ? 12 : hh > 12 ? hh - 12 : hh;
   const ampm = hh >= 12 ? 'p.m.' : 'a.m.';
   return `${DIAS[dow]}. ${dy} ${MESES[mo-1]}. · ${h12}:${String(mm).padStart(2,'0')} ${ampm} (Col)`;
 }
@@ -760,59 +925,93 @@ function matchSortKey(m) {
 }
 
 function renderStandings() {
-  const standings = PLAYERS.map((name, i) => {
-    const mp16  = MATCHES.reduce((s,m) => s + (calcMatchPoints(m.result, m.predictions[i]) ?? 0), 0);
-    const mpOct = MATCHES_OCT.reduce((s,m) => s + (calcMatchPoints(m.result, m.predictions[i]) ?? 0), 0);
-    return { name, i, p1: PHASE1_PTS[i], mp16, mpOct, bp: bonusPts(i), tot: totalPts(i) };
-  }).sort((a,b) => b.tot - a.tot);
-  const uniqueTotals = [...new Set(standings.map(p => p.tot))].sort((a,b) => b-a);
-  standings.forEach(p => { p.pos = uniqueTotals.indexOf(p.tot) + 1; });
-  const medals = {1:'🥇',2:'🥈',3:'🥉'}; const medCls = {1:'medal-1',2:'medal-2',3:'medal-3'};
+  const standings = PLAYERS
+    .map((name, i) => {
+      const mp16  = MATCHES.reduce((s, m) => s + (calcMatchPoints(m.result, m.predictions[i]) ?? 0), 0);
+      const mpOct = MATCHES_OCT.reduce((s, m) => s + (calcMatchPoints(m.result, m.predictions[i]) ?? 0), 0);
+      return { name, i, p1: PHASE1_PTS[i], mp16, mpOct, bp: bonusPts(i), tot: totalPts(i) };
+    })
+    .sort((a, b) => b.tot - a.tot);
+
+  // Dense ranking: position = rank among unique score tiers (1, 2, 2, 3 — not 1, 2, 2, 4)
+  const uniqueTotals = [...new Set(standings.map(p => p.tot))].sort((a, b) => b - a);
+  standings.forEach(p => {
+    p.pos = uniqueTotals.indexOf(p.tot) + 1;
+  });
+
+  const medals = { 1: '🥇', 2: '🥈', 3: '🥉' };
+  const medCls = { 1: 'medal-1', 2: 'medal-2', 3: 'medal-3' };
+
   document.getElementById('standings-body').innerHTML = standings.map(p => `
     <tr id="player-row-${p.i}" style="cursor:pointer" onclick="handlePlayerClick(${p.i}, this)">
       <td class="pos ${medCls[p.pos] || ''}">${medals[p.pos] || p.pos + '.'}</td>
-      <td class="name"><button class="player-btn">${p.name} <span class="chevron">▼</span></button></td>
+      <td class="name">
+        <button class="player-btn">${p.name} <span class="chevron">▼</span></button>
+      </td>
       <td class="pts-sub">${p.p1}</td>
       <td class="pts-sub">${p.mp16 > 0 ? '+' + p.mp16 : '–'}</td>
       <td class="pts-sub">${p.mpOct > 0 ? '+' + p.mpOct : '–'}</td>
       <td class="pts-bonus">${p.bp > 0 ? '+' + p.bp : '–'}</td>
       <td class="pts-total">${p.tot}</td>
-    </tr>`).join('');
+    </tr>
+  `).join('');
 }
 
 function flagImg(country, size) {
-  const url = getFlagUrl(country); const s = size || 24;
-  return url ? `<img src="${url}" alt="${country}" style="width:${s}px;height:${Math.round(s*0.67)}px;border-radius:3px;object-fit:cover;vertical-align:middle;margin-right:0.35rem;border:1px solid rgba(255,255,255,0.1)">` : '';
+  const url = getFlagUrl(country);
+  const s = size || 24;
+  return url
+    ? `<img src="${url}" alt="${country}" style="width:${s}px;height:${Math.round(s*0.67)}px;border-radius:3px;object-fit:cover;vertical-align:middle;margin-right:0.35rem;border:1px solid rgba(255,255,255,0.1)">`
+    : '';
 }
 
 function renderMatchList(matchArray, containerId) {
   const today = new Date().toLocaleDateString('en-CA', {timeZone:'America/Bogota'});
-  const sorted = [...matchArray].sort((a,b) => matchSortKey(a).localeCompare(matchSortKey(b)));
+  const sorted = [...matchArray].sort((a, b) => matchSortKey(a).localeCompare(matchSortKey(b)));
   document.getElementById(containerId).innerHTML = sorted.map(m => {
-    const played = m.result[0] !== null; const isLive = m._live === true;
-    const isToday = m.date === today;
-    const statusLabel = isLive ? (m._inAET ? `🔴 ${m._clock||'ET'} (marcador 90')` : `🔴 ${m._clock || 'EN VIVO'}`) : played ? 'Jugado' : isToday ? 'Hoy' : 'Pendiente';
-    const statusCls = isLive ? 'status-live' : played ? 'status-played' : isToday ? 'status-today' : 'status-upcoming';
-    const resultStr = played ? `${m.result[0]}–${m.result[1]}` : '– vs –';
-    const f1 = flagImg(m.team1, 22); const f2 = flagImg(m.team2, 22);
-    const predRows = PLAYERS.map((name,i) => {
+    const played      = m.result[0] !== null;
+    const isLive      = m._live === true;
+    const isToday     = m.date === today;
+    const statusLabel = isLive
+      ? (m._inAET ? `🔴 ${m._clock||'ET'} (marcador 90')` : `🔴 ${m._clock || 'EN VIVO'}`)
+      : played ? 'Jugado' : isToday ? 'Hoy' : 'Pendiente';
+    const statusCls   = isLive ? 'status-live' : played ? 'status-played' : isToday ? 'status-today' : 'status-upcoming';
+    const resultStr   = played ? `${m.result[0]}–${m.result[1]}` : '– vs –';
+
+    const f1 = flagImg(m.team1, 22);
+    const f2 = flagImg(m.team2, 22);
+
+    const predRows = PLAYERS.map((name, i) => {
       const pts = calcMatchPoints(m.result, m.predictions[i]);
       const ptsCls = pts === null ? 'pts-pending' : pts === 10 ? 'pts-10' : pts === 5 ? 'pts-5' : 'pts-0';
       return `<div class="prediction-cell">
         <span class="pname" title="${name}">${name.split(' ')[0]}</span>
         <span class="pred-score">${m.predictions[i][0]}–${m.predictions[i][1]}</span>
-        <span class="pred-pts ${ptsCls}">${pts === null ? '?' : pts}</span></div>`;
+        <span class="pred-pts ${ptsCls}">${pts === null ? '?' : pts}</span>
+      </div>`;
     }).join('');
+
     const cardId = `mc-${m.id}`;
     return `<div class="match-card${isLive ? ' open' : ''}" id="${cardId}">
       <div class="match-header" onclick="toggleMatch('${cardId}')">
-        <div><div class="match-teams">${f1}${m.team1}<span style="color:var(--muted);margin:0 0.4rem">vs</span>${f2}${m.team2}</div>
-          <div class="match-meta">${formatDateTime(m.id)}</div></div>
+        <div>
+          <div class="match-teams">
+            ${f1}${m.team1}
+            <span style="color:var(--muted);margin:0 0.4rem">vs</span>
+            ${f2}${m.team2}
+          </div>
+          <div class="match-meta">${formatDateTime(m.id)}</div>
+        </div>
         <div style="display:flex;align-items:center;gap:0.75rem">
           <span class="match-result">${resultStr}</span>
           <span class="match-status ${statusCls}">${statusLabel}</span>
-          <span class="match-chevron">▼</span></div></div>
-      <div class="predictions-collapse"><div class="predictions-grid">${predRows}</div></div></div>`;
+          <span class="match-chevron">▼</span>
+        </div>
+      </div>
+      <div class="predictions-collapse">
+        <div class="predictions-grid">${predRows}</div>
+      </div>
+    </div>`;
   }).join('');
 }
 
@@ -821,14 +1020,24 @@ function renderMatches() {
   renderMatchList(MATCHES, 'matches-container');
 }
 
-let GOAL_COUNTS = {};
-let GOAL_LEADERS_DATA = [];
+// ── Goal leaders (ESPN API) ─────────────────────────────────────────────────
+let GOAL_COUNTS = {};        // normalized ESPN name → goals
+let GOAL_LEADERS_DATA = [];  // full sorted leader objects from ESPN
 
+// Maps our short/alt prediction names → normalized ESPN display name
 const GOLEADOR_TO_ESPN = {
-  'haaland':'erling haaland','erling haaland':'erling haaland','harry kane':'harry kane',
-  'kane':'harry kane','mbappe':'kylian mbappe','kylian mbappe':'kylian mbappe',
-  'lucho diaz':'luis diaz','luis diaz':'luis diaz','kai havertz':'kai havertz',
-  'havertz':'kai havertz','luis suarez':'luis suarez','suarez':'luis suarez',
+  'haaland':        'erling haaland',
+  'erling haaland': 'erling haaland',
+  'harry kane':     'harry kane',
+  'kane':           'harry kane',
+  'mbappe':         'kylian mbappe',
+  'kylian mbappe':  'kylian mbappe',
+  'lucho diaz':     'luis diaz',
+  'luis diaz':      'luis diaz',
+  'kai havertz':    'kai havertz',
+  'havertz':        'kai havertz',
+  'luis suarez':    'luis suarez',
+  'suarez':         'luis suarez',
 };
 
 function getPlayerGoals(predName) {
@@ -836,53 +1045,136 @@ function getPlayerGoals(predName) {
   if (GOAL_COUNTS[norm] !== undefined) return GOAL_COUNTS[norm];
   const espnNorm = GOLEADOR_TO_ESPN[norm];
   if (espnNorm && GOAL_COUNTS[espnNorm] !== undefined) return GOAL_COUNTS[espnNorm];
-  return Object.keys(GOAL_COUNTS).length > 0 ? 0 : null;
+  return Object.keys(GOAL_COUNTS).length > 0 ? 0 : null;  // null = not yet loaded
 }
 
 async function fetchGoalLeaders() {
   try {
-    const res = await fetch('https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/statistics?limit=50', {cache:'no-store'});
+    const res = await fetch(
+      'https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/statistics?limit=50',
+      { cache: 'no-store' }
+    );
     if (!res.ok) return;
     const data = await res.json();
     const cat = (data.stats || []).find(s => s.name === 'goalsLeaders');
     if (!cat) return;
+
     GOAL_LEADERS_DATA = [];
     for (const leader of cat.leaders) {
-      const a = leader.athlete; const nm = normalize(a.displayName);
+      const a    = leader.athlete;
+      const nm   = normalize(a.displayName);
       const mGoals = leader.displayValue.match(/Goals:\s*(\d+)/);
-      const goals = mGoals ? parseInt(mGoals[1]) : 0;
+      const goals  = mGoals ? parseInt(mGoals[1]) : 0;
       if (mGoals) GOAL_COUNTS[nm] = goals;
+
+      // Collect assists from statistics array
       const assistStat = (a.statistics || []).find(s => s.name === 'goalAssists');
-      const appStat = (a.statistics || []).find(s => s.name === 'appearances');
+      const appStat    = (a.statistics || []).find(s => s.name === 'appearances');
       GOAL_LEADERS_DATA.push({
-        name: a.displayName, goals,
-        assists: assistStat ? parseInt(assistStat.value) : 0,
-        matches: appStat ? parseInt(appStat.value) : 0,
+        name:        a.displayName,
+        goals,
+        assists:     assistStat ? parseInt(assistStat.value) : 0,
+        matches:     appStat    ? parseInt(appStat.value)    : 0,
         headshotUrl: a.headshot?.href || '',
-        teamName: a.team?.displayName || '',
-        teamLogo: a.team?.logos?.[0]?.href || '',
-        teamAbbr: a.team?.abbreviation?.toLowerCase() || '',
+        teamName:    a.team?.displayName || '',
+        teamLogo:    a.team?.logos?.[0]?.href || '',
+        teamAbbr:    a.team?.abbreviation?.toLowerCase() || '',
       });
     }
+
     renderBonus();
-  } catch(e) {}
+  } catch(e) { /* silently ignore */ }
+}
+
+function renderGoalLeaderSection() {
+  const section = document.getElementById('goal-leader-section');
+  const inner   = document.getElementById('goal-leader-inner');
+  if (!section || !inner || GOAL_LEADERS_DATA.length === 0) return;
+
+  // Build ranked tiers: group players by goal count, keep top 3 tiers
+  const tiers = [];
+  let lastGoals = -1;
+  for (const l of GOAL_LEADERS_DATA) {
+    if (l.goals !== lastGoals) {
+      tiers.push({ goals: l.goals, players: [] });
+      lastGoals = l.goals;
+    }
+    tiers[tiers.length - 1].players.push(l);
+    if (tiers.length === 5 && tiers[tiers.length-1].players.length >= 1) break;
+  }
+  const top3Tiers = tiers.slice(0, 5);
+
+  const medals     = ['🥇', '🥈', '🥉', '4.º', '5.º'];
+  const tierLabels = ['Líder goleador del Mundial 2026', '2.º puesto', '3.er puesto', '4.º puesto', '5.º puesto'];
+
+  const html = top3Tiers.map((tier, tierIdx) => {
+    const pos   = tierIdx + 1;
+    const medal = medals[tierIdx] || `${pos}.`;
+    const tied  = tier.players.length > 1
+      ? `<span class="leader-tied">(${tier.players.length} empatados)</span>` : '';
+
+    const playerCards = tier.players.map((l, pi) => {
+      const flagUrl = l.teamLogo || (l.teamAbbr ? `https://flagcdn.com/w40/${l.teamAbbr}.png` : '');
+      const flagImg = flagUrl
+        ? `<img src="${flagUrl}" class="leader-flag-sm" alt="${l.teamName}" onerror="this.style.display='none'">`
+        : '';
+      const photo = l.headshotUrl
+        ? `<img src="${l.headshotUrl}" class="leader-photo" alt="${l.name}" onerror="this.style.background='#1a3d22'">`
+        : `<div class="leader-photo" style="display:flex;align-items:center;justify-content:center;font-size:1.8rem">⚽</div>`;
+
+      return `<div class="leader-card" style="${pi > 0 ? 'margin-top:0.45rem;padding-top:0.45rem;border-top:1px solid #0d2a18' : ''}">
+        <div class="leader-crown" style="${tierIdx > 0 ? 'font-size:1.1rem' : ''}">${pi === 0 ? medal : ''}</div>
+        ${photo}
+        <div class="leader-info">
+          ${pi === 0 ? `<div class="leader-title">${tierLabels[tierIdx]} ${tied}</div>` : ''}
+          <div class="leader-name" style="${tierIdx > 0 ? 'font-size:0.9rem' : ''}">${l.name}</div>
+          <div class="leader-team">${flagImg}${l.teamName}</div>
+          <div class="leader-stats">
+            <span class="leader-stat${tierIdx === 0 ? ' gold' : ''}">⚽ ${l.goals} gol${l.goals !== 1 ? 'es' : ''}</span>
+            ${l.assists > 0 ? `<span class="leader-stat">🎯 ${l.assists}</span>` : ''}
+            <span class="leader-stat">📋 ${l.matches} PJ</span>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+
+    return `<div style="${tierIdx > 0 ? 'margin-top:0.7rem;padding-top:0.7rem;border-top:1px solid #1a3d22' : ''}">${playerCards}</div>`;
+  }).join('');
+
+  inner.innerHTML = html;
+  section.style.display = 'block';
 }
 
 function renderBonus() {
   document.getElementById('bonus-grid').innerHTML = ['goleador','campeon'].map(key => {
-    const b = BONUS[key]; const isGoleador = key === 'goleador';
-    const cards = PLAYERS.map((name,i) => {
-      const pred = b.predictions[i];
-      const scored = b.result !== null && normalize(pred) === normalize(b.result);
+    const b = BONUS[key];
+    const isGoleador = key === 'goleador';
+
+    const cards = PLAYERS.map((name, i) => {
+      const pred    = b.predictions[i];
+      const scored  = b.result !== null && normalize(pred) === normalize(b.result);
+      const isWinner = scored;
+
       let imgHtml;
       if (isGoleador) {
         const wikiPage = GOLEADOR_WIKI[normalize(pred)];
-        imgHtml = wikiPage ? `<img class="bonus-photo" src="" data-wiki="${wikiPage}" alt="${pred}" title="${pred}" />` : `<div class="bonus-photo-placeholder">⚽</div>`;
+        if (wikiPage) {
+          imgHtml = `<img class="bonus-photo" src="" data-wiki="${wikiPage}" alt="${pred}" title="${pred}" />`;
+        } else {
+          imgHtml = `<div class="bonus-photo-placeholder">⚽</div>`;
+        }
       } else {
         const flagUrl = getFlagUrl(pred);
-        imgHtml = flagUrl ? `<img class="bonus-flag" src="${flagUrl}" alt="${pred}" title="${pred}" />` : `<div class="bonus-photo-placeholder">🏆</div>`;
+        imgHtml = flagUrl
+          ? `<img class="bonus-flag" src="${flagUrl}" alt="${pred}" title="${pred}" />`
+          : `<div class="bonus-photo-placeholder">🏆</div>`;
       }
-      const ptsBadge = b.result !== null ? `<div class="bonus-result-tag">${scored ? '+'+b.pts+' pts ✅' : '0 pts'}</div>` : '';
+
+      const ptsBadge = b.result !== null
+        ? `<div class="bonus-result-tag">${scored ? '+' + b.pts + ' pts ✅' : '0 pts'}</div>`
+        : '';
+
+      // Goal count badge (goleador only)
       let goalBadge = '';
       if (isGoleador) {
         const goals = getPlayerGoals(pred);
@@ -892,67 +1184,125 @@ function renderBonus() {
           goalBadge = `<div class="goal-badge${isTop ? ' top' : ''}">⚽ ${goals} gol${goals !== 1 ? 'es' : ''}</div>`;
         }
       }
-      return `<div class="bonus-card ${scored ? 'bonus-winner' : ''}">${imgHtml}<div class="bonus-player">${name.split(' ')[0]}</div><div class="bonus-name" style="font-size:0.8rem">${pred}</div>${goalBadge}${ptsBadge}</div>`;
+
+      return `<div class="bonus-card ${isWinner ? 'bonus-winner' : ''}">
+        ${imgHtml}
+        <div class="bonus-player">${name.split(' ')[0]}</div>
+        <div class="bonus-name" style="font-size:0.8rem">${pred}</div>
+        ${goalBadge}
+        ${ptsBadge}
+      </div>`;
     }).join('');
+
+    // Top-2 goal scorers of the full tournament (regardless of predictions)
     let goalTableHtml = '';
     if (isGoleador && GOAL_LEADERS_DATA.length > 0) {
-      const tiers = []; let lastG = -1;
+      // Build top-2 tiers from full ESPN leaderboard
+      const tiers = [];
+      let lastG = -1;
       for (const l of GOAL_LEADERS_DATA) {
-        if (l.goals !== lastG) { tiers.push({goals:l.goals,players:[]}); lastG = l.goals; }
-        tiers[tiers.length-1].players.push(l);
+        if (l.goals !== lastG) { tiers.push({ goals: l.goals, players: [] }); lastG = l.goals; }
+        tiers[tiers.length - 1].players.push(l);
         if (tiers.length === 2) break;
       }
+
       const medals2 = ['🥇','🥈'];
-      const rows = tiers.map((tier,ti) => {
+      const rows = tiers.map((tier, ti) => {
         const names = tier.players.map(p => {
           const flagUrl = p.teamLogo || (p.teamAbbr ? `https://flagcdn.com/w20/${p.teamAbbr}.png` : '');
           const flag = flagUrl ? `<img src="${flagUrl}" style="width:16px;height:11px;border-radius:2px;object-fit:cover;vertical-align:middle;margin-right:3px" onerror="this.style.display='none'">` : '';
           return `${flag}${p.name}`;
         }).join('<span style="color:var(--muted)"> · </span>');
         const tied = tier.players.length > 1 ? `<span style="font-size:0.65rem;color:var(--muted);margin-left:3px">(${tier.players.length})</span>` : '';
-        return `<div class="goal-row"><span class="goal-rank ${ti===0?'g1':'g2'}">${medals2[ti]}</span><span class="goal-pname" style="flex:1;min-width:0">${names}${tied}</span><span class="goal-count">⚽ ${tier.goals}</span></div>`;
+        return `<div class="goal-row">
+          <span class="goal-rank ${ti===0?'g1':'g2'}">${medals2[ti]}</span>
+          <span class="goal-pname" style="flex:1;min-width:0">${names}${tied}</span>
+          <span class="goal-count">⚽ ${tier.goals}</span>
+        </div>`;
       }).join('');
-      goalTableHtml = `<div class="goal-table"><div style="font-size:0.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Top goleadores del torneo</div>${rows}</div>`;
+
+      goalTableHtml = `<div class="goal-table">
+        <div style="font-size:0.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Top goleadores del torneo</div>
+        ${rows}
+      </div>`;
     }
-    const resultTag = b.result ? `<span style="font-size:0.75rem;color:var(--accent2);font-weight:600;margin-left:0.5rem">${isGoleador ? '⚽' : '🏆'} ${b.result}</span>` : '';
+
+    const resultTag = b.result
+      ? `<span style="font-size:0.75rem;color:var(--accent2);font-weight:600;margin-left:0.5rem">
+           ${isGoleador ? '⚽' : '🏆'} ${b.result}
+         </span>`
+      : '';
+
     const collapseId = `bonus-${key}`;
     return `<div style="margin-bottom:0.75rem">
       <div class="bonus-collapse-header" id="${collapseId}-hdr" onclick="toggleBonus('${collapseId}')">
-        <div style="display:flex;align-items:center;gap:0.5rem"><span style="font-weight:700">${isGoleador ? '⚽' : '🏆'} ${b.label}</span><span class="bonus-pts-badge">${b.pts} pts</span>${resultTag}</div>
-        <span class="chev">▼</span></div>
-      <div class="bonus-collapse-body" id="${collapseId}-body">${goalTableHtml}<div class="bonus-grid" style="margin-top:0.5rem">${cards}</div></div></div>`;
+        <div style="display:flex;align-items:center;gap:0.5rem">
+          <span style="font-weight:700">${isGoleador ? '⚽' : '🏆'} ${b.label}</span>
+          <span class="bonus-pts-badge">${b.pts} pts</span>
+          ${resultTag}
+        </div>
+        <span class="chev">▼</span>
+      </div>
+      <div class="bonus-collapse-body" id="${collapseId}-body">
+        ${goalTableHtml}
+        <div class="bonus-grid" style="margin-top:0.5rem">${cards}</div>
+      </div>
+    </div>`;
   }).join('');
+
+  // Load player photos asynchronously after DOM is ready
   setTimeout(loadAllPlayerPhotos, 0);
 }
 
 function renderProgress() {
+  const played = MATCHES.filter(m => m.result[0] !== null).length;
+  const total  = MATCHES.length + MATCHES_OCT.length;
   const playedOctP = MATCHES_OCT.filter(m => m.result[0] !== null).length;
-  const totalOct = MATCHES_OCT.length;
-  document.getElementById('progress-label').textContent = `⚽ ${playedOctP} de ${totalOct} partidos jugados (Octavos de Final)`;
-  document.getElementById('progress-fill').style.width = Math.round(playedOctP / totalOct * 100) + '%';
+  const totalOct   = MATCHES_OCT.length;
+  document.getElementById('progress-label').textContent =
+    `⚽ ${playedOctP} de ${totalOct} partidos jugados (Octavos de Final)`;
+  document.getElementById('progress-fill').style.width =
+    Math.round(playedOctP / totalOct * 100) + '%';
 }
 
 function updateDate() {
-  document.getElementById('last-updated').textContent = new Date().toLocaleString('es-CO', {dateStyle:'medium',timeStyle:'short'});
+  document.getElementById('last-updated').textContent =
+    new Date().toLocaleString('es-CO', { dateStyle: 'medium', timeStyle: 'short' });
 }
 
-function toggleMatch(cardId) { document.getElementById(cardId).classList.toggle('open'); }
+// ── Collapsible helpers ──
+function toggleMatch(cardId) {
+  document.getElementById(cardId).classList.toggle('open');
+}
 function toggleOctSection() {
   const body = document.getElementById('matches-oct-body');
   const chev = document.getElementById('matches-oct-chev');
   body.classList.toggle('open');
   chev.style.transform = body.classList.contains('open') ? 'rotate(180deg)' : '';
 }
+function toggleMatchesSection() {
+  const body = document.getElementById('matches-section-body');
+  const chev = document.getElementById('matches-chev');
+  body.style.display = body.style.display === 'none' ? '' : 'none';
+  chev.style.transform = body.style.display === 'none' ? '' : 'rotate(180deg)';
+}
 function toggleBonus(collapseId) {
-  const hdr = document.getElementById(`${collapseId}-hdr`);
+  const hdr  = document.getElementById(`${collapseId}-hdr`);
   const body = document.getElementById(`${collapseId}-body`);
-  hdr.classList.toggle('open'); body.classList.toggle('open');
+  hdr.classList.toggle('open');
+  body.classList.toggle('open');
 }
 
+// ── Share helpers ──
 function copyLink() {
   const url = 'https://tinyurl.com/28qqlyoy';
-  if (navigator.clipboard) { navigator.clipboard.writeText(url).then(() => showToast('Link copiado ✅')); }
-  else { const ta = document.createElement('textarea'); ta.value = url; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); showToast('Link copiado ✅'); }
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(url).then(() => showToast('Link copiado ✅'));
+  } else {
+    const ta = document.createElement('textarea');
+    ta.value = url; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+    showToast('Link copiado ✅');
+  }
 }
 function openQR()  { document.getElementById('qr-overlay').classList.add('open'); }
 function closeQR() { document.getElementById('qr-overlay').classList.remove('open'); }
@@ -964,20 +1314,28 @@ function showToast(msg) {
   clearTimeout(t._timer); t._timer = setTimeout(() => t.style.opacity = '0', 2200);
 }
 
+// ══════════════════════════════════════════
+//  LIVE SCORES — ESPN API (client-side)
+// ══════════════════════════════════════════
 const ESPN_TEAM_MAP = {
-  'South Africa':'Sudáfrica','Canada':'Canadá','Germany':'Alemania','Paraguay':'Paraguay',
-  'Netherlands':'Países Bajos','Morocco':'Marruecos','Brazil':'Brasil','Japan':'Japón',
-  'France':'Francia','Sweden':'Suecia','Ivory Coast':'Costa de Marfil',"Côte d'Ivoire":'Costa de Marfil',
-  'Norway':'Noruega','Mexico':'México','Ecuador':'Ecuador','England':'Inglaterra',
-  'DR Congo':'R. del Congo','Congo DR':'R. del Congo','Democratic Republic of Congo':'R. del Congo',
+  'South Africa':'Sudáfrica','Canada':'Canadá','Germany':'Alemania',
+  'Paraguay':'Paraguay','Netherlands':'Países Bajos','Morocco':'Marruecos',
+  'Brazil':'Brasil','Japan':'Japón','France':'Francia','Sweden':'Suecia',
+  'Ivory Coast':'Costa de Marfil',"Côte d'Ivoire":'Costa de Marfil',
+  'Norway':'Noruega','Mexico':'México','Ecuador':'Ecuador',
+  'England':'Inglaterra','DR Congo':'R. del Congo','Congo DR':'R. del Congo',
+  'Democratic Republic of Congo':'R. del Congo',
   'United States':'Estados Unidos','USA':'Estados Unidos',
-  'Bosnia and Herzegovina':'Bosnia y Herzegovina','Bosnia & Herzegovina':'Bosnia y Herzegovina',
-  'Belgium':'Bélgica','Senegal':'Senegal','Portugal':'Portugal','Croatia':'Croacia',
-  'Spain':'España','Austria':'Austria','Switzerland':'Suiza','Algeria':'Argelia',
-  'Argentina':'Argentina','Cape Verde':'Cabo Verde','Colombia':'Colombia','Ghana':'Ghana',
+  'Bosnia and Herzegovina':'Bosnia y Herzegovina',
+  'Bosnia & Herzegovina':'Bosnia y Herzegovina',
+  'Belgium':'Bélgica','Senegal':'Senegal','Portugal':'Portugal',
+  'Croatia':'Croacia','Spain':'España','Austria':'Austria',
+  'Switzerland':'Suiza','Algeria':'Argelia','Argentina':'Argentina',
+  'Cape Verde':'Cabo Verde','Colombia':'Colombia','Ghana':'Ghana',
   'Australia':'Australia','Egypt':'Egipto',
 };
 
+// Dates to check: Round of 32 (Jun 28 – Jul 3)
 const SCORE_DATES = ['20260628','20260629','20260630','20260701','20260702','20260703','20260704','20260705','20260706','20260707'];
 
 let liveScoreLastFetch = null;
@@ -985,39 +1343,70 @@ let liveScoreLastFetch = null;
 async function loadLiveScores(showFeedback = false) {
   const btn = document.getElementById('btn-refresh-scores');
   if (btn) { btn.disabled = true; btn.textContent = '⏳ Actualizando…'; }
-  let updated = 0; let liveCount = 0;
+
+  let updated = 0;
+  let liveCount = 0;
+
   for (const d of SCORE_DATES) {
     try {
-      const res = await fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard?dates=${d}`, {cache:'no-store'});
+      const res = await fetch(
+        `https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard?dates=${d}`,
+        { cache: 'no-store' }
+      );
       if (!res.ok) continue;
       const data = await res.json();
+
       for (const event of data.events || []) {
-        const comp = event.competitions[0]; const status = comp.status.type;
-        const isLive = status.state === 'in' || status.state === 'halftime';
-        const isDone = status.completed;
-        const isAET = isDone && (status.name === 'STATUS_FINAL_AET' || status.name === 'STATUS_FINAL_PEN');
-        const isInAET = isLive && (comp.status.period > 2);
-        const clock = isLive && !isInAET ? (comp.status.displayClock || '') : isInAET ? 'ET' : '';
+        const comp = event.competitions[0];
+        const status = comp.status.type;
+        // 90-min states: STATUS_FULL_TIME (id 28) or still in play (periods 1-2)
+        // Extra time / penalties: STATUS_FINAL_AET, STATUS_FINAL_PEN
+        const isLive    = status.state === 'in' || status.state === 'halftime';
+        const isDone    = status.completed;
+        const isAET     = isDone && (status.name === 'STATUS_FINAL_AET' || status.name === 'STATUS_FINAL_PEN');
+        // Only periods 1 & 2 count (= 90 minutes regular time)
+        const isInAET   = isLive && (comp.status.period > 2);  // live extra time
+        const clock     = isLive && !isInAET ? (comp.status.displayClock || '') : isInAET ? 'ET' : '';
+
         const home = comp.competitors.find(c => c.homeAway === 'home');
         const away = comp.competitors.find(c => c.homeAway === 'away');
         if (!home || !away) continue;
+
         const homeEs = ESPN_TEAM_MAP[home.team.displayName] || home.team.displayName;
         const awayEs = ESPN_TEAM_MAP[away.team.displayName] || away.team.displayName;
+
+        // ── Score extraction: ONLY regular time (periods 1 + 2) ──────────────
+        // If ended in AET or PKs, sum linescores for periods 1 & 2 only.
+        // ESPN scoreboard sometimes has empty linescores for AET matches;
+        // in that case we fetch the event summary which always has them.
         function reg90FromLinescores(ls) {
-          const first2 = ls.slice(0,2);
-          return first2.reduce((s,l) => s + (parseInt(l.value ?? l.displayValue) || 0), 0);
+          // Summary endpoint linescores: [{displayValue:'0'},{displayValue:'2'},{displayValue:'0'},{displayValue:'1'}]
+          // Scoreboard linescores:       [{value:0,period:1},{value:2,period:2},...]
+          // Take first 2 entries regardless of which format.
+          const first2 = ls.slice(0, 2);
+          return first2.reduce((s, l) => s + (parseInt(l.value ?? l.displayValue) || 0), 0);
         }
+
         function reg90Score(competitor) {
           const ls = competitor.linescores;
-          if ((isAET || isInAET) && Array.isArray(ls) && ls.length >= 2) return reg90FromLinescores(ls);
+          if ((isAET || isInAET) && Array.isArray(ls) && ls.length >= 2) {
+            return reg90FromLinescores(ls);
+          }
           return parseInt(competitor.score) || 0;
         }
-        const homeLs = home.linescores || []; const awayLs = away.linescores || [];
+
+        // If AET but scoreboard has no linescores, fetch event summary for period scores
+        const homeLs = home.linescores || [];
+        const awayLs = away.linescores || [];
         const needsSummary = isAET && (homeLs.length < 2 || awayLs.length < 2);
         let homeScore, awayScore;
+
         if (needsSummary) {
           try {
-            const sumRes = await fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/summary?event=${event.id}`, {cache:'no-store'});
+            const sumRes = await fetch(
+              `https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/summary?event=${event.id}`,
+              { cache: 'no-store' }
+            );
             if (sumRes.ok) {
               const sumData = await sumRes.json();
               const sumComp = (sumData.header?.competitions || [])[0];
@@ -1025,61 +1414,110 @@ async function loadLiveScores(showFeedback = false) {
               const sumAway = (sumComp?.competitors || []).find(c => c.homeAway === 'away');
               homeScore = sumHome?.linescores?.length >= 2 ? reg90FromLinescores(sumHome.linescores) : parseInt(home.score) || 0;
               awayScore = sumAway?.linescores?.length >= 2 ? reg90FromLinescores(sumAway.linescores) : parseInt(away.score) || 0;
-            } else { homeScore = reg90Score(home); awayScore = reg90Score(away); }
-          } catch(_) { homeScore = reg90Score(home); awayScore = reg90Score(away); }
-        } else { homeScore = reg90Score(home); awayScore = reg90Score(away); }
+            } else {
+              homeScore = reg90Score(home);
+              awayScore = reg90Score(away);
+            }
+          } catch(_) {
+            homeScore = reg90Score(home);
+            awayScore = reg90Score(away);
+          }
+        } else {
+          homeScore = reg90Score(home);
+          awayScore = reg90Score(away);
+        }
+
         if (isLive) {
           liveCount++;
+          // Tag the match as in extra time so the UI can show it clearly
           if (isInAET) {
-            for (const m of [...MATCHES, ...MATCHES_OCT]) {
+            for (const m of MATCHES) {
               const h = normalize(homeEs), aw = normalize(awayEs);
-              if ((normalize(m.team1)===h && normalize(m.team2)===aw) || (normalize(m.team1)===aw && normalize(m.team2)===h)) m._inAET = true;
+              if ((normalize(m.team1)===h && normalize(m.team2)===aw) ||
+                  (normalize(m.team1)===aw && normalize(m.team2)===h)) {
+                m._inAET = true;
+              }
             }
           }
         }
+
         for (const m of [...MATCHES, ...MATCHES_OCT]) {
           const t1n = normalize(m.team1), t2n = normalize(m.team2);
           const h = normalize(homeEs), aw = normalize(awayEs);
           let s1, s2;
-          if (t1n === h && t2n === aw) { s1 = homeScore; s2 = awayScore; }
-          else if (t1n === aw && t2n === h) { s1 = awayScore; s2 = homeScore; }
+
+          if (t1n === h && t2n === aw)       { s1 = homeScore; s2 = awayScore; }
+          else if (t1n === aw && t2n === h)  { s1 = awayScore; s2 = homeScore; }
           else continue;
+
+          // Update result: always for live/done matches
           if (isDone || isLive) {
             const prev = JSON.stringify(m.result);
-            m.result = [s1, s2]; m._live = isLive; m._clock = clock;
+            m.result = [s1, s2];
+            m._live   = isLive;
+            m._clock  = clock;
             if (isDone) { m._live = false; m._clock = ''; }
             if (JSON.stringify(m.result) !== prev || isLive) updated++;
           }
         }
       }
-    } catch(e) {}
+    } catch(e) { /* silently ignore CORS/network errors */ }
   }
+
   liveScoreLastFetch = new Date();
+
   if (updated > 0) {
-    renderStandings(); renderMatches(); renderPrizes(); renderProgress();
+    renderStandings();
+    renderMatches();
+    renderPrizes();
+    renderProgress();
+    // Refresh open player panel
     if (openPlayerIdx !== null) {
       const rowEl = document.getElementById(`player-row-${openPlayerIdx}`);
       if (rowEl) { closePlayerDetail(); openPlayerDetail(openPlayerIdx, rowEl); }
     }
   }
+
+  // Update status badge
   const badge = document.getElementById('live-badge');
   if (badge) {
-    if (liveCount > 0) { badge.textContent = `🔴 EN VIVO — ${liveCount} partido${liveCount>1?'s':''} en curso`; badge.style.color = '#ef4444'; }
-    else { const hm = liveScoreLastFetch.toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'}); badge.textContent = `Actualizado ${hm}`; badge.style.color = 'var(--muted)'; }
+    if (liveCount > 0) {
+      badge.textContent = `🔴 EN VIVO — ${liveCount} partido${liveCount>1?'s':''} en curso`;
+      badge.style.color = '#ef4444';
+    } else {
+      const hm = liveScoreLastFetch.toLocaleTimeString('es-CO', {hour:'2-digit',minute:'2-digit'});
+      badge.textContent = `Actualizado ${hm}`;
+      badge.style.color = 'var(--muted)';
+    }
   }
-  if (btn) { btn.disabled = false; btn.textContent = '🔄 Actualizar marcadores'; }
+
+  if (btn) {
+    btn.disabled = false;
+    btn.textContent = '🔄 Actualizar marcadores';
+  }
+  // Also refresh goal leaders
   fetchGoalLeaders();
-  if (showFeedback) showToast(updated > 0 ? `✅ ${updated} resultado${updated>1?'s':''} actualizado${updated>1?'s':''}` : 'Sin cambios nuevos');
-  if (liveCount > 0) setTimeout(() => loadLiveScores(false), 90_000);
+
+  if (showFeedback) {
+    showToast(updated > 0 ? `✅ ${updated} resultado${updated>1?'s':''} actualizado${updated>1?'s':''}` : 'Sin cambios nuevos');
+  }
+
+  // If there are live matches, auto-refresh in 90s
+  if (liveCount > 0) {
+    setTimeout(() => loadLiveScores(false), 90_000);
+  }
+
   return updated;
 }
 
+// ── Init ──
 renderProgress();
 renderStandings();
 renderMatches();
 renderBonus();
 renderPrizes();
 updateDate();
+// Fetch live scores and goal leaders on load (non-blocking)
 loadLiveScores(false);
 fetchGoalLeaders();
 </script>
