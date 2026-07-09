@@ -339,15 +339,6 @@
     <tbody id="standings-body"></tbody>
   </table>
 
-  <!-- ═══ 3. MATCHES OCT ═══ -->
-  <div class="section-title" id="matches-oct-hdr" onclick="toggleOctSection()" style="cursor:pointer;user-select:none">
-    ⚽ Partidos Octavos de Final (3ª Fase)
-    <span id="matches-oct-chev" style="font-size:0.7rem;color:var(--muted);font-weight:400;letter-spacing:0;text-transform:none;transition:transform 0.2s;display:inline-block;transform:rotate(180deg)">▼</span>
-  </div>
-  <div class="bonus-collapse-body open" id="matches-oct-body">
-    <div id="matches-oct-container" style="padding-top:0.5rem"></div>
-  </div>
-
   <!-- ═══ 3b. MATCHES QF ═══ -->
   <div class="section-title" id="matches-qf-hdr" onclick="toggleQFSection()" style="cursor:pointer;user-select:none">
     ⚽ Partidos Cuartos de Final (4ª Fase)
@@ -1056,7 +1047,6 @@ function renderMatchList(matchArray, containerId) {
 
 function renderMatches() {
   renderMatchList(MATCHES_QF, 'matches-qf-container');
-  renderMatchList(MATCHES_OCT, 'matches-oct-container');
   renderMatchList(MATCHES, 'matches-container');
 }
 
