@@ -243,6 +243,15 @@
       border: 2px solid var(--border); display: flex; align-items: center;
       justify-content: center; margin: 0 auto 0.4rem; font-size: 1.4rem;
     }
+    /* ── Eliminado del bonus ── */
+    .bonus-card.bonus-eliminated { opacity: 0.65; }
+    .bonus-card.bonus-eliminated .bonus-photo,
+    .bonus-card.bonus-eliminated .bonus-flag,
+    .bonus-card.bonus-eliminated .bonus-photo-placeholder {
+      filter: grayscale(1); opacity: 0.45;
+    }
+    .bonus-card.bonus-eliminated .bonus-name { color: var(--muted); }
+    .bonus-eliminated-tag { font-size: 0.65rem; color: var(--red); font-weight: 700; margin-top: 0.25rem; }
 
     /* ── Note box ── */
     .note-box { background: #1e293b; border-left: 3px solid var(--accent); border-radius: 8px; padding: 0.75rem 1rem; font-size: 0.85rem; color: var(--muted); margin-bottom: 1.5rem; }
@@ -464,6 +473,27 @@ const BONUS = {
                   'Francia','España','Portugal','Francia','Inglaterra','Alemania'],
     result: null,  // ← Actualizar con el nombre del campeón cuando se conozca
   },
+};
+
+// Equipos que siguen VIVOS en el torneo (semifinalistas).
+// Actualizar tras cada fase eliminatoria. Normalizado (sin acentos, minúsculas).
+const ALIVE_TEAMS = ['francia', 'espana', 'inglaterra', 'argentina'];
+
+// País de cada goleador candidato (para saber si ya fue eliminado del torneo)
+// Keys pre-normalizadas para coincidir con normalize()
+const GOLEADOR_COUNTRY = {
+  'haaland':        'noruega',
+  'erling haaland': 'noruega',
+  'harry kane':     'inglaterra',
+  'kane':           'inglaterra',
+  'mbappe':         'francia',
+  'kylian mbappe':  'francia',
+  'lucho diaz':     'colombia',
+  'luis diaz':      'colombia',
+  'kai havertz':    'alemania',
+  'havertz':        'alemania',
+  'luis suarez':    'colombia',
+  'suarez':         'colombia',
 };
 
 // Wikipedia article titles for each predicted goleador
@@ -1211,6 +1241,17 @@ function renderBonus() {
       const scored  = b.result !== null && normalize(pred) === normalize(b.result);
       const isWinner = scored;
 
+      // ¿La selección ya está eliminada del torneo?
+      let eliminated = false;
+      if (isGoleador) {
+        const country = GOLEADOR_COUNTRY[normalize(pred)];
+        eliminated = country ? !ALIVE_TEAMS.includes(country) : false;
+      } else {
+        eliminated = !ALIVE_TEAMS.includes(normalize(pred));
+      }
+      // Si ya acertó (torneo terminado) no lo marcamos como eliminado
+      if (isWinner) eliminated = false;
+
       let imgHtml;
       if (isGoleador) {
         const wikiPage = GOLEADOR_WIKI[normalize(pred)];
@@ -1241,11 +1282,16 @@ function renderBonus() {
         }
       }
 
-      return `<div class="bonus-card ${isWinner ? 'bonus-winner' : ''}">
+      const elimTag = eliminated
+        ? `<div class="bonus-eliminated-tag">❌ Eliminado</div>`
+        : '';
+
+      return `<div class="bonus-card ${isWinner ? 'bonus-winner' : ''} ${eliminated ? 'bonus-eliminated' : ''}">
         ${imgHtml}
         <div class="bonus-player">${name.split(' ')[0]}</div>
         <div class="bonus-name" style="font-size:0.8rem">${pred}</div>
         ${goalBadge}
+        ${elimTag}
         ${ptsBadge}
       </div>`;
     }).join('');
