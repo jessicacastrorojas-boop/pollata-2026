@@ -263,7 +263,7 @@
 <div class="header">
   <h1>⚽ Polla Mundialista 2026 — ATA</h1>
   <div class="subtitle">México · Estados Unidos · Canadá</div>
-  <div class="phase-badge">🏆 Cuarta Fase — Cuartos de Final</div>
+  <div class="phase-badge">🏆 Quinta Fase — Semifinales</div>
 </div>
 
 <!-- Share bar -->
@@ -333,18 +333,28 @@
         <th style="text-align:right;font-size:0.7rem">16avos</th>
         <th style="text-align:right;font-size:0.7rem">8vos</th>
         <th style="text-align:right;font-size:0.7rem">Cuartos</th>
+        <th style="text-align:right;font-size:0.7rem">Semis</th>
         <th style="text-align:right;font-size:0.7rem">Bonus</th>
       </tr>
     </thead>
     <tbody id="standings-body"></tbody>
   </table>
 
+  <!-- ═══ 3c. MATCHES SF ═══ -->
+  <div class="section-title" id="matches-sf-hdr" onclick="toggleSFSection()" style="cursor:pointer;user-select:none">
+    ⚽ Partidos Semifinales (5ª Fase)
+    <span id="matches-sf-chev" style="font-size:0.7rem;color:var(--muted);font-weight:400;letter-spacing:0;text-transform:none;transition:transform 0.2s;display:inline-block;transform:rotate(180deg)">▼</span>
+  </div>
+  <div class="bonus-collapse-body open" id="matches-sf-body">
+    <div id="matches-sf-container" style="padding-top:0.5rem"></div>
+  </div>
+
   <!-- ═══ 3b. MATCHES QF ═══ -->
   <div class="section-title" id="matches-qf-hdr" onclick="toggleQFSection()" style="cursor:pointer;user-select:none">
     ⚽ Partidos Cuartos de Final (4ª Fase)
-    <span id="matches-qf-chev" style="font-size:0.7rem;color:var(--muted);font-weight:400;letter-spacing:0;text-transform:none;transition:transform 0.2s;display:inline-block;transform:rotate(180deg)">▼</span>
+    <span id="matches-qf-chev" style="font-size:0.7rem;color:var(--muted);font-weight:400;letter-spacing:0;text-transform:none;transition:transform 0.2s;display:inline-block">▼</span>
   </div>
-  <div class="bonus-collapse-body open" id="matches-qf-body">
+  <div class="bonus-collapse-body" id="matches-qf-body">
     <div id="matches-qf-container" style="padding-top:0.5rem"></div>
   </div>
 
@@ -403,6 +413,12 @@ const MATCHES_QF = [
    predictions:[[2,2],[1,1],[1,2],[2,1],[1,2],[2,1],[2,2],[1,2],[1,2],[1,2],[3,2],[2,2]]},
   {id:28,date:'2026-07-11',team1:'Argentina',team2:'Suiza',result:[null,null],
    predictions:[[2,0],[2,1],[2,1],[2,1],[2,0],[0,0],[3,1],[2,0],[2,0],[1,0],[2,0],[2,1]]}
+];
+const MATCHES_SF = [
+  {id:29,date:'2026-07-14',team1:'Francia',team2:'España',result:[null,null],
+   predictions:[[2,1],[2,0],[3,1],[3,1],[1,2],[2,1],[2,1],[2,2],[2,1],[1,0],[2,0],[3,1]]},
+  {id:30,date:'2026-07-15',team1:'Inglaterra',team2:'Argentina',result:[null,null],
+   predictions:[[1,0],[1,2],[2,1],[1,1],[2,1],[2,1],[1,2],[1,1],[0,1],[1,1],[2,1],[2,1]]}
 ];
 const PHASE1_MATCHES = [{"d":"2026-06-16","g":"I","t1":"France","t2":"Senegal","r":[3,1],"p":[[3,1,10],[3,1,10],[3,1,10],[2,1,5],[2,0,5],[2,0,5],[2,0,5],[2,0,5],[1,0,5],[2,1,5],[2,0,5],[2,1,5]]},{"d":"2026-06-16","g":"I","t1":"Iraq","t2":"Norway","r":[1,4],"p":[[0,3,5],[1,1,0],[1,3,5],[0,2,5],[0,2,5],[1,0,0],[1,1,0],[0,2,5],[1,1,0],[0,1,5],[0,1,5],[0,2,5]]},{"d":"2026-06-16","g":"J","t1":"Argentina","t2":"Algeria","r":[3,0],"p":[[1,0,5],[3,1,5],[3,0,10],[3,0,10],[3,0,10],[2,0,5],[3,0,10],[2,0,5],[4,1,5],[2,0,5],[3,1,5],[3,1,5]]},{"d":"2026-06-17","g":"J","t1":"Austria","t2":"Jordan","r":[3,1],"p":[[2,0,5],[2,1,5],[2,1,5],[2,1,5],[3,0,5],[1,1,0],[2,0,5],[1,1,0],[3,1,10],[2,1,5],[3,0,5],[2,1,5]]},{"d":"2026-06-17","g":"K","t1":"Portugal","t2":"DR Congo","r":[1,1],"p":[[3,1,0],[3,1,0],[3,0,0],[2,1,0],[3,0,0],[2,0,0],[3,0,0],[4,0,0],[4,1,0],[2,0,0],[2,0,0],[4,0,0]]},{"d":"2026-06-17","g":"L","t1":"England","t2":"Croatia","r":[4,2],"p":[[1,1,0],[2,1,5],[2,1,5],[1,1,0],[2,1,5],[2,1,5],[2,1,5],[2,1,5],[2,1,5],[2,2,0],[2,1,5],[1,1,0]]},{"d":"2026-06-17","g":"L","t1":"Ghana","t2":"Panama","r":[1,0],"p":[[2,1,5],[2,0,5],[3,0,5],[2,1,5],[1,1,0],[1,1,0],[2,0,5],[1,1,0],[2,1,5],[1,0,10],[2,0,5],[1,2,0]]},{"d":"2026-06-17","g":"K","t1":"Uzbekistan","t2":"Colombia","r":[1,3],"p":[[0,2,5],[0,2,5],[0,2,5],[1,3,10],[0,2,5],[1,2,5],[0,2,5],[1,1,0],[1,3,10],[0,1,5],[1,2,5],[0,3,5]]},{"d":"2026-06-18","g":"A","t1":"Czechia","t2":"South Africa","r":[1,1],"p":[[1,0,0],[3,0,0],[1,1,10],[2,1,0],[2,0,0],[1,2,0],[1,1,10],[0,1,0],[1,1,10],[1,0,0],[2,1,0],[1,0,0]]},{"d":"2026-06-18","g":"B","t1":"Switzerland","t2":"Bosnia and Herzegovina","r":[4,1],"p":[[2,1,5],[2,0,5],[3,0,5],[1,1,0],[2,0,5],[0,0,0],[1,0,5],[3,1,5],[1,2,0],[1,1,0],[2,1,5],[3,1,5]]},{"d":"2026-06-18","g":"B","t1":"Canada","t2":"Qatar","r":[6,0],"p":[[1,0,5],[3,1,5],[2,1,5],[2,1,5],[2,0,5],[1,0,5],[2,1,5],[1,2,0],[1,2,0],[2,1,5],[2,1,5],[1,0,5]]},{"d":"2026-06-18","g":"A","t1":"Mexico","t2":"South Korea","r":[1,0],"p":[[2,2,0],[2,1,5],[2,1,5],[1,0,10],[2,1,5],[1,1,0],[2,1,5],[1,2,0],[2,1,5],[1,1,0],[1,1,0],[1,1,0]]},{"d":"2026-06-19","g":"D","t1":"United States","t2":"Australia","r":[2,0],"p":[[2,0,10],[2,1,5],[3,1,5],[2,1,5],[2,1,5],[2,0,10],[2,0,10],[2,1,5],[3,1,5],[2,1,5],[2,1,5],[2,2,0]]},{"d":"2026-06-19","g":"C","t1":"Scotland","t2":"Morocco","r":[0,1],"p":[[0,2,5],[1,1,0],[2,2,0],[1,1,0],[0,2,5],[0,2,5],[1,2,5],[1,2,5],[0,1,10],[0,1,10],[1,1,0],[0,0,0]]},{"d":"2026-06-19","g":"C","t1":"Brazil","t2":"Haiti","r":[3,0],"p":[[3,0,10],[4,0,5],[4,0,5],[3,1,5],[4,0,5],[2,0,5],[4,0,5],[4,0,5],[2,0,5],[3,0,10],[2,0,5],[3,0,10]]},{"d":"2026-06-19","g":"D","t1":"Turkey","t2":"Paraguay","r":[0,1],"p":[[2,1,0],[1,1,0],[1,1,0],[1,1,0],[1,1,0],[1,1,0],[1,1,0],[1,2,5],[1,0,0],[1,1,0],[2,1,0],[1,2,5]]},{"d":"2026-06-20","g":"F","t1":"Netherlands","t2":"Sweden","r":[5,1],"p":[[2,1,5],[2,1,5],[2,1,5],[2,0,5],[2,0,5],[2,1,5],[1,1,0],[2,2,0],[1,1,0],[2,1,5],[2,0,5],[2,0,5]]},{"d":"2026-06-20","g":"E","t1":"Germany","t2":"Ivory Coast","r":[2,1],"p":[[3,1,5],[4,1,5],[4,0,5],[2,1,10],[3,1,5],[4,0,5],[2,0,5],[2,0,5],[2,0,5],[3,1,5],[2,1,10],[3,1,5]]},{"d":"2026-06-20","g":"E","t1":"Ecuador","t2":"Curacao","r":[0,0],"p":[[2,1,0],[3,0,0],[3,1,0],[3,0,0],[3,0,0],[2,1,0],[2,0,0],[2,0,0],[1,0,0],[2,1,0],[3,1,0],[2,0,0]]},{"d":"2026-06-21","g":"F","t1":"Tunisia","t2":"Japan","r":[0,4],"p":[[0,2,5],[0,3,5],[2,2,0],[1,2,5],[0,2,5],[0,1,5],[1,2,5],[1,3,5],[1,1,0],[1,2,5],[0,2,5],[0,1,5]]},{"d":"2026-06-21","g":"H","t1":"Spain","t2":"Saudi Arabia","r":[4,0],"p":[[2,0,5],[4,1,5],[3,1,5],[2,0,5],[3,0,5],[2,0,5],[3,1,5],[3,1,5],[2,0,5],[1,0,5],[2,1,5],[3,0,5]]},{"d":"2026-06-21","g":"G","t1":"Belgium","t2":"Iran","r":[0,0],"p":[[3,0,0],[2,1,0],[3,1,0],[2,1,0],[2,0,0],[2,2,5],[3,1,0],[2,0,0],[3,1,0],[2,1,0],[3,2,0],[1,1,5]]},{"d":"2026-06-21","g":"H","t1":"Uruguay","t2":"Cape Verde","r":[2,2],"p":[[1,0,0],[2,1,0],[3,0,0],[1,1,5],[3,0,0],[1,0,0],[2,0,0],[2,0,0],[2,1,0],[1,0,0],[1,2,0],[3,0,0]]},{"d":"2026-06-21","g":"G","t1":"New Zealand","t2":"Egypt","r":[1,3],"p":[[1,2,5],[1,2,5],[2,2,0],[1,1,0],[0,1,5],[2,0,0],[0,1,5],[2,2,0],[1,1,0],[1,2,5],[1,0,0],[3,1,0]]},{"d":"2026-06-22","g":"J","t1":"Argentina","t2":"Austria","r":[2,0],"p":[[2,1,5],[3,1,5],[2,1,5],[2,1,5],[2,0,10],[2,0,10],[2,0,10],[3,1,5],[2,0,10],[3,1,5],[2,1,5],[2,1,5]]},{"d":"2026-06-22","g":"I","t1":"France","t2":"Iraq","r":[3,0],"p":[[4,1,5],[3,0,10],[4,0,5],[2,0,5],[4,0,5],[3,0,10],[3,0,10],[3,0,10],[2,0,5],[4,1,5],[2,1,5],[4,1,5]]},{"d":"2026-06-22","g":"I","t1":"Norway","t2":"Senegal","r":[3,2],"p":[[3,2,10],[1,2,0],[1,2,0],[2,0,5],[2,1,5],[1,1,0],[1,1,0],[2,1,5],[0,1,0],[1,0,5],[2,0,5],[3,2,10]]},{"d":"2026-06-22","g":"J","t1":"Jordan","t2":"Algeria","r":[1,2],"p":[[1,2,10],[1,3,5],[1,1,0],[1,1,0],[0,2,5],[0,0,0],[0,2,5],[1,2,10],[1,2,10],[1,1,0],[2,1,0],[1,1,0]]},{"d":"2026-06-23","g":"K","t1":"Portugal","t2":"Uzbekistan","r":[5,0],"p":[[3,0,5],[4,1,5],[4,0,5],[2,0,5],[3,0,5],[2,0,5],[3,1,5],[4,1,5],[4,1,5],[3,1,5],[2,1,5],[4,1,5]]},{"d":"2026-06-23","g":"L","t1":"England","t2":"Ghana","r":[0,0],"p":[[3,1,0],[3,0,0],[3,1,0],[2,0,0],[3,0,0],[3,0,0],[2,1,0],[3,0,0],[2,1,0],[1,0,0],[3,1,0],[4,2,0]]},{"d":"2026-06-23","g":"L","t1":"Panama","t2":"Croatia","r":[0,1],"p":[[0,2,5],[0,4,5],[0,2,5],[1,2,5],[0,2,5],[0,2,5],[1,2,5],[0,2,5],[0,1,10],[1,3,5],[1,2,5],[0,2,5]]},{"d":"2026-06-23","g":"K","t1":"Colombia","t2":"DR Congo","r":[1,0],"p":[[1,1,0],[3,1,5],[2,0,5],[2,0,5],[2,0,5],[3,0,5],[2,0,5],[2,1,5],[2,2,0],[2,1,5],[3,0,5],[2,0,5]]},{"d":"2026-06-24","g":"B","t1":"Switzerland","t2":"Canada","r":[2,1],"p":[[2,1,10],[1,1,0],[2,2,0],[1,2,0],[1,1,0],[1,2,0],[1,1,0],[2,2,0],[2,1,10],[1,1,0],[1,2,0],[2,1,10]]},{"d":"2026-06-24","g":"B","t1":"Bosnia and Herzegovina","t2":"Qatar","r":[3,1],"p":[[1,1,0],[1,2,0],[1,1,0],[1,1,0],[2,0,5],[1,1,0],[2,1,5],[1,2,0],[1,2,0],[1,0,5],[1,2,0],[3,1,10]]},{"d":"2026-06-24","g":"C","t1":"Scotland","t2":"Brazil","r":[0,3],"p":[[0,2,5],[1,3,5],[1,3,5],[1,2,5],[0,3,10],[0,2,5],[0,2,5],[1,3,5],[0,2,5],[1,3,5],[1,2,5],[2,4,5]]},{"d":"2026-06-24","g":"C","t1":"Morocco","t2":"Haiti","r":[4,2],"p":[[3,0,5],[4,1,5],[3,0,5],[3,0,5],[3,0,5],[2,0,5],[3,0,5],[2,0,5],[1,0,5],[2,0,5],[2,0,5],[4,0,5]]},{"d":"2026-06-24","g":"A","t1":"Czechia","t2":"Mexico","r":[0,3],"p":[[0,1,5],[2,2,0],[1,2,5],[1,2,5],[1,2,5],[0,1,5],[1,2,5],[1,2,5],[1,2,5],[0,1,5],[1,2,5],[2,2,0]]},{"d":"2026-06-24","g":"A","t1":"South Africa","t2":"South Korea","r":[1,0],"p":[[0,2,0],[1,4,0],[1,1,0],[1,2,0],[0,2,0],[2,1,5],[1,2,0],[1,3,0],[1,2,0],[0,2,0],[1,1,0],[1,1,0]]},{"d":"2026-06-25","g":"E","t1":"Ecuador","t2":"Germany","r":[2,1],"p":[[0,3,0],[1,3,0],[1,3,0],[1,2,0],[1,3,0],[1,2,0],[1,2,0],[2,4,0],[0,2,0],[1,3,0],[1,2,0],[1,3,0]]},{"d":"2026-06-25","g":"E","t1":"Curacao","t2":"Ivory Coast","r":[0,2],"p":[[1,2,5],[0,3,5],[0,1,5],[1,3,5],[0,2,10],[1,2,5],[0,2,10],[2,2,0],[0,1,5],[1,3,5],[0,3,5],[1,4,5]]},{"d":"2026-06-25","g":"F","t1":"Tunisia","t2":"Netherlands","r":[1,3],"p":[[0,3,5],[1,4,5],[1,2,5],[1,3,10],[0,2,5],[1,1,0],[0,2,5],[0,2,5],[0,2,5],[1,2,5],[1,2,5],[1,2,5]]},{"d":"2026-06-25","g":"F","t1":"Japan","t2":"Sweden","r":[1,1],"p":[[2,2,5],[2,1,0],[1,3,0],[1,1,10],[1,1,10],[2,1,0],[1,2,0],[3,2,0],[1,2,0],[2,2,5],[1,2,0],[2,1,0]]},{"d":"2026-06-25","g":"D","t1":"Turkey","t2":"United States","r":[3,2],"p":[[1,1,0],[1,3,0],[1,3,0],[1,2,0],[1,2,0],[1,2,0],[1,2,0],[1,3,0],[1,3,0],[0,1,0],[1,2,0],[1,4,0]]},{"d":"2026-06-25","g":"D","t1":"Paraguay","t2":"Australia","r":[0,0],"p":[[1,0,0],[1,1,5],[2,1,0],[1,2,0],[1,0,0],[1,1,5],[2,1,0],[3,1,0],[0,1,0],[1,1,5],[0,2,0],[3,0,0]]},{"d":"2026-06-26","g":"I","t1":"Norway","t2":"France","r":[1,4],"p":[[1,1,0],[1,2,5],[1,3,5],[1,2,5],[1,2,5],[0,2,5],[0,2,5],[1,2,5],[0,2,5],[1,3,5],[1,3,5],[2,3,5]]},{"d":"2026-06-26","g":"I","t1":"Senegal","t2":"Iraq","r":[5,0],"p":[[3,1,5],[3,1,5],[3,1,5],[1,1,0],[2,0,5],[2,1,5],[2,0,5],[2,0,5],[1,1,0],[2,0,5],[1,2,0],[2,0,5]]},{"d":"2026-06-26","g":"H","t1":"Uruguay","t2":"Spain","r":[0,1],"p":[[0,2,5],[1,3,5],[1,2,5],[1,2,5],[2,2,0],[2,2,0],[1,1,0],[1,3,5],[1,1,0],[1,2,5],[1,2,5],[1,1,0]]},{"d":"2026-06-26","g":"H","t1":"Cape Verde","t2":"Saudi Arabia","r":[0,0],"p":[[0,0,10],[2,1,0],[1,2,0],[2,1,0],[1,1,5],[1,2,0],[1,1,5],[0,1,0],[1,2,0],[1,3,0],[2,0,0],[2,2,5]]},{"d":"2026-06-26","g":"G","t1":"New Zealand","t2":"Belgium","r":[1,5],"p":[[0,2,5],[1,3,5],[1,3,5],[0,2,5],[1,2,5],[2,2,0],[0,2,5],[1,3,5],[0,1,5],[1,2,5],[1,2,5],[0,3,5]]},{"d":"2026-06-26","g":"G","t1":"Egypt","t2":"Iran","r":[1,1],"p":[[2,1,0],[2,1,0],[2,2,5],[1,1,10],[3,1,0],[1,1,10],[1,1,10],[2,2,5],[2,0,0],[3,1,0],[0,1,0],[2,0,0]]},{"d":"2026-06-27","g":"L","t1":"Panama","t2":"England","r":[0,2],"p":[[0,4,5],[0,4,5],[0,3,5],[0,2,10],[1,4,5],[0,2,10],[0,3,5],[0,3,5],[0,2,10],[1,4,5],[0,3,5],[1,3,5]]},{"d":"2026-06-27","g":"L","t1":"Croatia","t2":"Ghana","r":[2,1],"p":[[2,1,10],[3,1,5],[2,1,10],[2,0,5],[2,1,10],[2,0,5],[1,1,0],[3,1,5],[1,0,5],[2,1,10],[2,0,5],[3,1,5]]},{"d":"2026-06-27","g":"K","t1":"Colombia","t2":"Portugal","r":[0,0],"p":[[1,2,0],[1,2,0],[1,1,5],[1,0,0],[2,2,5],[2,1,0],[2,2,5],[1,3,0],[1,2,0],[1,1,5],[1,1,5],[2,2,5]]},{"d":"2026-06-27","g":"K","t1":"DR Congo","t2":"Uzbekistan","r":[3,1],"p":[[2,1,5],[1,1,0],[2,2,0],[1,1,0],[1,1,0],[1,1,0],[1,1,0],[1,1,0],[1,0,5],[2,1,5],[2,1,5],[1,2,0]]},{"d":"2026-06-27","g":"J","t1":"Jordan","t2":"Argentina","r":[1,3],"p":[[0,3,5],[0,4,5],[0,2,5],[0,3,5],[0,2,5],[0,3,5],[0,3,5],[1,2,5],[0,3,5],[1,4,5],[1,3,10],[0,3,5]]},{"d":"2026-06-27","g":"J","t1":"Algeria","t2":"Austria","r":[3,3],"p":[[1,1,5],[1,1,5],[1,1,5],[1,2,0],[1,2,0],[1,2,0],[1,1,5],[2,2,5],[1,2,0],[1,1,5],[0,2,0],[1,1,5]]}];
 
@@ -576,7 +592,8 @@ function matchPts(playerIdx) {
   const p16  = MATCHES.reduce((s, m) => s + (calcMatchPoints(m.result, m.predictions[playerIdx]) ?? 0), 0);
   const pOct = MATCHES_OCT.reduce((s, m) => s + (calcMatchPoints(m.result, m.predictions[playerIdx]) ?? 0), 0);
   const pQF  = MATCHES_QF.reduce((s, m) => s + (calcMatchPoints(m.result, m.predictions[playerIdx]) ?? 0), 0);
-  return p16 + pOct + pQF;
+  const pSF  = MATCHES_SF.reduce((s, m) => s + (calcMatchPoints(m.result, m.predictions[playerIdx]) ?? 0), 0);
+  return p16 + pOct + pQF + pSF;
 }
 
 function totalPts(playerIdx) {
@@ -711,11 +728,15 @@ function openPlayerDetail(playerIdx, rowEl) {
   const played16 = MATCHES.filter(m => m.result[0] !== null);
   const playedOct = MATCHES_OCT.filter(m => m.result[0] !== null);
   const playedQF = MATCHES_QF.filter(m => m.result[0] !== null);
+  const playedSF = MATCHES_SF.filter(m => m.result[0] !== null);
   const pendingOct = MATCHES_OCT.filter(m => m.result[0] === null);
   const pendingQF = MATCHES_QF.filter(m => m.result[0] === null);
+  const pendingSF = MATCHES_SF.filter(m => m.result[0] === null);
   const pending16 = MATCHES.filter(m => m.result[0] === null);
-  const played  = [...played16, ...playedOct, ...playedQF];
-  const pending = [...pending16, ...pendingOct, ...pendingQF];
+  const played  = [...played16, ...playedOct, ...playedQF, ...playedSF];
+  const pending = [...pending16, ...pendingOct, ...pendingQF, ...pendingSF];
+  const exactosSF = playedSF.filter(m => calcMatchPoints(m.result, m.predictions[playerIdx]) === 10).length;
+  const resultsSF = playedSF.filter(m => calcMatchPoints(m.result, m.predictions[playerIdx]) === 5).length;
   const exactosQF = playedQF.filter(m => calcMatchPoints(m.result, m.predictions[playerIdx]) === 10).length;
   const resultsQF = playedQF.filter(m => calcMatchPoints(m.result, m.predictions[playerIdx]) === 5).length;
   const exactosOct = playedOct.filter(m => calcMatchPoints(m.result, m.predictions[playerIdx]) === 10).length;
@@ -724,8 +745,8 @@ function openPlayerDetail(playerIdx, rowEl) {
   const results16 = played16.filter(m => calcMatchPoints(m.result, m.predictions[playerIdx]) === 5).length;
   const exactos1 = PHASE1_MATCHES.filter(m => m.p[playerIdx][2] === 10).length;
   const results1 = PHASE1_MATCHES.filter(m => m.p[playerIdx][2] === 5).length;
-  const exactos  = exactos1 + exactos16 + exactosOct + exactosQF;
-  const results  = results1 + results16 + resultsOct + resultsQF;
+  const exactos  = exactos1 + exactos16 + exactosOct + exactosQF + exactosSF;
+  const results  = results1 + results16 + resultsOct + resultsQF + resultsSF;
 
   function matchRow(m) {
     const isPlayed = m.result[0] !== null;
@@ -785,19 +806,24 @@ function openPlayerDetail(playerIdx, rowEl) {
   }
 
   const pendingHTML = `
+    ${pendingSF.length > 0 ? pendingSF.map(matchRow).join('') : ''}
     ${pendingQF.length > 0 ? pendingQF.map(matchRow).join('') : ''}
     ${pendingOct.length > 0 ? pendingOct.map(matchRow).join('') : ''}
     ${pending16.length > 0 ? pending16.map(matchRow).join('') : ''}
     ${bonusRow('goleador')}
     ${bonusRow('campeon')}`;
 
+  const sfPts    = MATCHES_SF.reduce((s,m) => s + (calcMatchPoints(m.result, m.predictions[playerIdx]) ?? 0), 0);
   const qfPts    = MATCHES_QF.reduce((s,m) => s + (calcMatchPoints(m.result, m.predictions[playerIdx]) ?? 0), 0);
   const octPts   = MATCHES_OCT.reduce((s,m) => s + (calcMatchPoints(m.result, m.predictions[playerIdx]) ?? 0), 0);
   const pts16    = played16.reduce((s,m) => s + (calcMatchPoints(m.result, m.predictions[playerIdx]) ?? 0), 0);
   const phase1pts = PHASE1_MATCHES.reduce((s,m) => s + (m.p[playerIdx][2] || 0), 0);
 
+  const sfSectionHeader = playedSF.length > 0
+    ? `<div style="font-size:0.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;padding:0.5rem 0.25rem 0.25rem">Semifinales (5ª Fase) — ${playedSF.length} partido${playedSF.length!==1?'s':''} · ${sfPts} pts</div>`
+    : '';
   const qfSectionHeader = playedQF.length > 0
-    ? `<div style="font-size:0.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;padding:0.5rem 0.25rem 0.25rem">Cuartos (4ª Fase) — ${playedQF.length} partido${playedQF.length!==1?'s':''} · ${qfPts} pts</div>`
+    ? `<div style="font-size:0.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;padding:0.5rem 0.25rem 0.25rem${playedSF.length > 0 ? ';border-top:1px solid var(--border);margin-top:0.5rem' : ''}">Cuartos (4ª Fase) — ${playedQF.length} partido${playedQF.length!==1?'s':''} · ${qfPts} pts</div>`
     : '';
   const octSectionHeader = playedOct.length > 0
     ? `<div style="font-size:0.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;padding:0.5rem 0.25rem 0.25rem${playedQF.length > 0 ? ';border-top:1px solid var(--border);margin-top:0.5rem' : ''}">Octavos (3ª Fase) — ${playedOct.length} partido${playedOct.length!==1?'s':''} · ${octPts} pts</div>`
@@ -808,6 +834,8 @@ function openPlayerDetail(playerIdx, rowEl) {
   const phase1SectionHeader = `<div style="font-size:0.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;padding:0.5rem 0.25rem 0.25rem;border-top:1px solid var(--border);margin-top:0.5rem">Fase de Grupos — ${PHASE1_MATCHES.length} partidos · ${phase1pts} pts</div>`;
 
   const playedHTML = `
+    ${sfSectionHeader}
+    ${playedSF.length > 0 ? playedSF.map(matchRow).join('') : ''}
     ${qfSectionHeader}
     ${playedQF.length > 0 ? playedQF.map(matchRow).join('') : ''}
     ${octSectionHeader}
@@ -817,7 +845,7 @@ function openPlayerDetail(playerIdx, rowEl) {
     ${phase1SectionHeader}
     ${PHASE1_MATCHES.map(phase1Row).join('')}`;
 
-  const totalPlayed = playedQF.length + playedOct.length + played16.length + PHASE1_MATCHES.length;
+  const totalPlayed = playedSF.length + playedQF.length + playedOct.length + played16.length + PHASE1_MATCHES.length;
 
   const detailHTML = `
     <div class="player-detail-inner">
@@ -825,7 +853,7 @@ function openPlayerDetail(playerIdx, rowEl) {
         <div>
           <div class="detail-name">${name}</div>
           <div class="detail-subtitle">
-            ${phase1pts} (grupos) + ${pts16} (16avos) + ${octPts} (octavos) + ${qfPts} (cuartos) + ${bp} (bonus) = <strong>${tot} total</strong>
+            ${phase1pts} (grupos) + ${pts16} (16avos) + ${octPts} (octavos) + ${qfPts} (cuartos) + ${sfPts} (semis) + ${bp} (bonus) = <strong>${tot} total</strong>
           </div>
         </div>
         <button class="detail-close" onclick="closePlayerDetail()">✕ Cerrar</button>
@@ -853,7 +881,7 @@ function openPlayerDetail(playerIdx, rowEl) {
   newRow.className = 'player-detail-row';
   newRow.id = `detail-row-${playerIdx}`;
   const td = document.createElement('td');
-  td.colSpan = 8;
+  td.colSpan = 9;
   td.innerHTML = detailHTML;
   newRow.appendChild(td);
   rowEl.parentNode.insertBefore(newRow, rowEl.nextSibling);
@@ -866,7 +894,7 @@ function openPlayerDetail(playerIdx, rowEl) {
     errRow.id = `detail-row-${playerIdx}`;
     errRow.className = 'player-detail-row';
     const errTd = document.createElement('td');
-    errTd.colSpan = 8;
+    errTd.colSpan = 9;
     errTd.style.cssText = 'padding:1rem;color:#f87171;background:#1e1e2e;font-size:0.85rem';
     errTd.textContent = '⚠️ Error al cargar panel: ' + e.message;
     errRow.appendChild(errTd);
@@ -930,6 +958,9 @@ const MATCH_TIMES_COL = {
   26:'2026-07-10T14:00',   // España vs Bélgica
   27:'2026-07-11T14:00',   // Noruega vs Inglaterra
   28:'2026-07-11T18:00',   // Argentina vs Suiza
+  // ── Semifinales (5ª Fase) ──
+  29:'2026-07-14T15:00',   // Francia vs España
+  30:'2026-07-15T15:00',   // Inglaterra vs Argentina
 };
 
 function formatDateTime(matchId) {
@@ -958,7 +989,8 @@ function renderStandings() {
       const mp16  = MATCHES.reduce((s, m) => s + (calcMatchPoints(m.result, m.predictions[i]) ?? 0), 0);
       const mpOct = MATCHES_OCT.reduce((s, m) => s + (calcMatchPoints(m.result, m.predictions[i]) ?? 0), 0);
       const mpQF  = MATCHES_QF.reduce((s, m) => s + (calcMatchPoints(m.result, m.predictions[i]) ?? 0), 0);
-      return { name, i, p1: PHASE1_PTS[i], mp16, mpOct, mpQF, bp: bonusPts(i), tot: totalPts(i) };
+      const mpSF  = MATCHES_SF.reduce((s, m) => s + (calcMatchPoints(m.result, m.predictions[i]) ?? 0), 0);
+      return { name, i, p1: PHASE1_PTS[i], mp16, mpOct, mpQF, mpSF, bp: bonusPts(i), tot: totalPts(i) };
     })
     .sort((a, b) => b.tot - a.tot);
 
@@ -982,6 +1014,7 @@ function renderStandings() {
       <td class="pts-sub">${p.mp16 > 0 ? '+' + p.mp16 : '–'}</td>
       <td class="pts-sub">${p.mpOct > 0 ? '+' + p.mpOct : '–'}</td>
       <td class="pts-sub">${p.mpQF > 0 ? '+' + p.mpQF : '–'}</td>
+      <td class="pts-sub">${p.mpSF > 0 ? '+' + p.mpSF : '–'}</td>
       <td class="pts-bonus" style="font-size:0.75rem">${p.bp > 0 ? '+' + p.bp : '–'}</td>
     </tr>
   `).join('');
@@ -1046,6 +1079,7 @@ function renderMatchList(matchArray, containerId) {
 }
 
 function renderMatches() {
+  renderMatchList(MATCHES_SF, 'matches-sf-container');
   renderMatchList(MATCHES_QF, 'matches-qf-container');
   renderMatchList(MATCHES, 'matches-container');
 }
@@ -1285,12 +1319,12 @@ function renderBonus() {
 }
 
 function renderProgress() {
-  const playedQFP = MATCHES_QF.filter(m => m.result[0] !== null).length;
-  const totalQF   = MATCHES_QF.length;
+  const playedSFP = MATCHES_SF.filter(m => m.result[0] !== null).length;
+  const totalSF   = MATCHES_SF.length;
   document.getElementById('progress-label').textContent =
-    `⚽ ${playedQFP} de ${totalQF} partidos jugados (Cuartos de Final)`;
+    `⚽ ${playedSFP} de ${totalSF} partidos jugados (Semifinales)`;
   document.getElementById('progress-fill').style.width =
-    Math.round(playedQFP / totalQF * 100) + '%';
+    Math.round(playedSFP / totalSF * 100) + '%';
 }
 
 function updateDate() {
@@ -1311,6 +1345,12 @@ function toggleOctSection() {
 function toggleQFSection() {
   const body = document.getElementById('matches-qf-body');
   const chev = document.getElementById('matches-qf-chev');
+  body.classList.toggle('open');
+  chev.style.transform = body.classList.contains('open') ? 'rotate(180deg)' : '';
+}
+function toggleSFSection() {
+  const body = document.getElementById('matches-sf-body');
+  const chev = document.getElementById('matches-sf-chev');
   body.classList.toggle('open');
   chev.style.transform = body.classList.contains('open') ? 'rotate(180deg)' : '';
 }
@@ -1370,7 +1410,7 @@ const ESPN_TEAM_MAP = {
 };
 
 // Dates to check: Round of 32 (Jun 28 – Jul 3)
-const SCORE_DATES = ['20260628','20260629','20260630','20260701','20260702','20260703','20260704','20260705','20260706','20260707','20260709','20260710','20260711'];
+const SCORE_DATES = ['20260628','20260629','20260630','20260701','20260702','20260703','20260704','20260705','20260706','20260707','20260709','20260710','20260711','20260714','20260715'];
 
 let liveScoreLastFetch = null;
 
@@ -1465,7 +1505,7 @@ async function loadLiveScores(showFeedback = false) {
           liveCount++;
           // Tag the match as in extra time so the UI can show it clearly
           if (isInAET) {
-            for (const m of [...MATCHES, ...MATCHES_OCT, ...MATCHES_QF]) {
+            for (const m of [...MATCHES, ...MATCHES_OCT, ...MATCHES_QF, ...MATCHES_SF]) {
               const h = normalize(homeEs), aw = normalize(awayEs);
               if ((normalize(m.team1)===h && normalize(m.team2)===aw) ||
                   (normalize(m.team1)===aw && normalize(m.team2)===h)) {
@@ -1475,7 +1515,7 @@ async function loadLiveScores(showFeedback = false) {
           }
         }
 
-        for (const m of [...MATCHES, ...MATCHES_OCT, ...MATCHES_QF]) {
+        for (const m of [...MATCHES, ...MATCHES_OCT, ...MATCHES_QF, ...MATCHES_SF]) {
           const t1n = normalize(m.team1), t2n = normalize(m.team2);
           const h = normalize(homeEs), aw = normalize(awayEs);
           let s1, s2;
