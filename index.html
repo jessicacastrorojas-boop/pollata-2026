@@ -610,6 +610,21 @@ function bonusPts(playerIdx) {
   return total;
 }
 
+// ¿La selección de bonus (goleador o campeón) ya quedó eliminada del torneo?
+function isPickEliminated(key, playerIdx) {
+  const pred = BONUS[key].predictions[playerIdx];
+  if (key === 'goleador') {
+    const country = GOLEADOR_COUNTRY[normalize(pred)];
+    return country ? !ALIVE_TEAMS.includes(country) : false;
+  }
+  return !ALIVE_TEAMS.includes(normalize(pred));
+}
+
+// Certeza de 0 puntos de bonus: goleador Y campeón eliminados
+function bonusCertainZero(playerIdx) {
+  return isPickEliminated('goleador', playerIdx) && isPickEliminated('campeon', playerIdx);
+}
+
 function matchPts(playerIdx) {
   const p16  = MATCHES.reduce((s, m) => s + (calcMatchPoints(m.result, m.predictions[playerIdx]) ?? 0), 0);
   const pOct = MATCHES_OCT.reduce((s, m) => s + (calcMatchPoints(m.result, m.predictions[playerIdx]) ?? 0), 0);
@@ -1012,7 +1027,7 @@ function renderStandings() {
       const mpOct = MATCHES_OCT.reduce((s, m) => s + (calcMatchPoints(m.result, m.predictions[i]) ?? 0), 0);
       const mpQF  = MATCHES_QF.reduce((s, m) => s + (calcMatchPoints(m.result, m.predictions[i]) ?? 0), 0);
       const mpSF  = MATCHES_SF.reduce((s, m) => s + (calcMatchPoints(m.result, m.predictions[i]) ?? 0), 0);
-      return { name, i, p1: PHASE1_PTS[i], mp16, mpOct, mpQF, mpSF, bp: bonusPts(i), tot: totalPts(i) };
+      return { name, i, p1: PHASE1_PTS[i], mp16, mpOct, mpQF, mpSF, bp: bonusPts(i), bonusZero: bonusCertainZero(i), tot: totalPts(i) };
     })
     .sort((a, b) => b.tot - a.tot);
 
@@ -1037,7 +1052,7 @@ function renderStandings() {
       <td class="pts-sub">${p.mpOct > 0 ? '+' + p.mpOct : '–'}</td>
       <td class="pts-sub">${p.mpQF > 0 ? '+' + p.mpQF : '–'}</td>
       <td class="pts-sub">${p.mpSF > 0 ? '+' + p.mpSF : '–'}</td>
-      <td class="pts-bonus" style="font-size:0.75rem">${p.bp > 0 ? '+' + p.bp : '–'}</td>
+      <td class="pts-bonus" style="font-size:0.75rem">${p.bp > 0 ? '+' + p.bp : (p.bonusZero ? '<span style="color:var(--muted)">0</span>' : '–')}</td>
     </tr>
   `).join('');
 }
